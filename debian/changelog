@@ -1,0 +1,11 @@
+visualization.spectrum (1.0.1-1~raring) raring; urgency=low
+
+  * Correct installation paths
+
+ -- Arne Morten Kvarving <arne.morten.kvarving@sintef.no>  Sat, 01 Jun 2013 00:31:35 +0200
+
+visualization.spectrum (1.0.0-1~raring) raring; urgency=low
+
+  * Initial release
+
+ -- Arne Morten Kvarving <arne.morten.kvarving@sintef.no>  Sat, 18 May 2013 23:06:14 +0200

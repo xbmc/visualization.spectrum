@@ -1,0 +1,6 @@
+macro(addon_version dir prefix)
+  FILE(READ ${dir}/addon.xml ADDONXML)
+  STRING(REGEX MATCH "<addon.*version.?=.?.[0-9\\.]+" VERSION_STRING ${ADDONXML})
+  STRING(REGEX MATCH "version.?=.?.[0-9\\.]+" VERSION_STRING ${VERSION_STRING})
+  STRING(REGEX MATCH "([0-9.]+)" ${prefix}_VERSION ${VERSION_STRING})
+endmacro()

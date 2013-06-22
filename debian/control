@@ -1,0 +1,15 @@
+Source: xbmc-visualization-spectrum
+Priority: extra
+Maintainer: Arne Morten Kvarving <spiff@xbmc.org>
+Build-Depends: debhelper (>= 8.0.0), cmake, xbmc-addon-dev,
+               xbmc-visualization-dev, libgl1-mesa-dev, libglew-dev
+Standards-Version: 3.9.2
+Section: libs
+Homepage: http://xbmc.org
+
+Package: xbmc-visualization-spectrum
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Spectrum visualizer for XBMC
+ Spectrum visualizer for XBMC
