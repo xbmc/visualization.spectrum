@@ -2,9 +2,9 @@ include ../../Makefile.include
 #DEPS= ../../Makefile.include Makefile
 
 LIBNAME=xbmc-visualization-spectrum
-VERSION=ddd4d236ace4b0713e32ae49722f848d09e505d7
+VERSION=0a88c73c5e2d266adbe346ff15e5e0904b1e047e
 GIT_DIR=$(TARBALLS_LOCATION)/$(LIBNAME).git
-BASE_URL=git://github.com/cptspiff/visualization.spectrum.git
+BASE_URL=git://github.com/davilla/visualization.spectrum.git
 DYLIB=$(PLATFORM)/visualization.spectrum/spectrum.so
 XBMC_ADDONSDIR=$(XBMCROOT)/addons
 ADDON=visualization.spectrum
