@@ -13,3 +13,11 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Spectrum visualizer for XBMC
  Spectrum visualizer for XBMC
+
+Package: xbmc-visualization-spectrum-dbg
+Section: debug
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: debug symbols for Spectrum visualizer for XBMC
+ debug symbols for Spectrum visualizer for XBMC
+
