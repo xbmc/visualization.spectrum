@@ -6,10 +6,10 @@
   provider-name="Team XBMC">
   <extension
     point="xbmc.player.musicviz"
-    library_linux="spectrum.so"
-    library_win32="spectrum.dll"
-    library_osx="spectrum.so"
-    library_android="libspectrum.so" />
+    library_linux="visualization.spectrum.so"
+    library_win32="visualization.spectrum.dll"
+    library_osx="visualization.spectrum.so"
+    library_android="libvisualization.spectrum.so" />
   <extension point="xbmc.addon.metadata">
     <summary lang="af">Visualisering wys a roterende 3D Spektrum Analiseerder</summary>
     <summary lang="ar">عارض يظهر طيف محلل دوري ثلاثي الأبعاد</summary>
