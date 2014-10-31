@@ -1,39 +1,39 @@
-PROJECT(visualization.spectrum)
+project(visualization.spectrum)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+cmake_minimum_required(VERSION 2.6)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR})
 
-FIND_PACKAGE(xbmc REQUIRED)
+find_package(kodi REQUIRED)
 
-IF(WIN32)
-  SET(SOURCES src/directx_spectrum.cpp)
-ELSE(WIN32)
+if(WIN32)
+  set(SOURCES src/directx_spectrum.cpp)
+else(WIN32)
   # Locate XBMC bindings
-  FIND_PATH(XBMC_INCLUDE_DIR xbmc/xbmc_addon_dll.h)
+  find_path(XBMC_INCLUDE_DIR xbmc/xbmc_addon_dll.h)
 
-  FIND_PACKAGE(OpenGLES)
-  IF(OPENGLES_FOUND)
-    SET(INCLUDES ${OPENGLES_INCLUDE_DIR})
-    ADD_DEFINITIONS(-DHAS_GLES)
-    SET(SPECTRUM_SOURCES src/opengl_spectrum.cpp
+  find_package(OpenGLES)
+  if(OPENGLES_FOUND)
+    set(INCLUDES ${OPENGLES_INCLUDE_DIR})
+    add_definitions(-DHAS_GLES)
+    set(SPECTRUM_SOURCES src/opengl_spectrum.cpp
                          src/VisGUIShader.cpp
                          src/VisMatrixGLES.cpp
                          src/VisShader.cpp)
-    SET(DEPLIBS ${OPENGLES_LIBRARIES})
-  ELSE(OPENGLES_FOUND)
-    FIND_PACKAGE(OpenGL REQUIRED)
-    FIND_PACKAGE(GLEW REQUIRED)
-    SET(INCLUDES ${OpenGL_INCLUDE_DIR}
+    set(DEPLIBS ${OPENGLES_LIBRARIES})
+  else()
+    find_package(OpenGL REQUIRED)
+    find_package(GLEW REQUIRED)
+    set(INCLUDES ${OpenGL_INCLUDE_DIR}
                  ${GLEW_INCLUDE_DIR})
-    ADD_DEFINITIONS(-DHAS_SDL_OPENGL)
-    SET(SPECTRUM_SOURCES src/opengl_spectrum.cpp)
-    SET(DEPLIBS ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})
-  ENDIF(OPENGLES_FOUND)
-ENDIF(WIN32)
+    add_definitions(-DHAS_SDL_OPENGL)
+    set(SPECTRUM_SOURCES src/opengl_spectrum.cpp)
+    set(DEPLIBS ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})
+  endif()
+endif()
 
-INCLUDE_DIRECTORIES(${INCLUDES}
-                    ${XBMC_INCLUDE_DIR})
+include_directories(${INCLUDES}
+                    ${KODI_INCLUDE_DIR})
 
 build_addon(visualization.spectrum SPECTRUM DEPLIBS)
 
