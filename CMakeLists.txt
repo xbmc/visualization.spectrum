@@ -7,7 +7,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR})
 find_package(kodi REQUIRED)
 
 if(WIN32)
-  set(SOURCES src/directx_spectrum.cpp)
+  find_package(DirectX REQUIRED)
+  set(INCLUDES ${DIRECTX_INCLUDE_DIR})
+  add_definitions(-DDIRECTX_SPEKTRUM_EXPORTS -D_WIN32PC -D_USRDLL)
+  set(SPECTRUM_SOURCES src/directx_spectrum.cpp)
+  set(DEPLIBS ${DIRECTX_D3DX9_LIBRARY})
 else(WIN32)
   # Locate XBMC bindings
   find_path(XBMC_INCLUDE_DIR xbmc/xbmc_addon_dll.h)
