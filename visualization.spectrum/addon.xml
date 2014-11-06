@@ -7,7 +7,7 @@
   <extension
     point="xbmc.player.musicviz"
     library_linux="visualization.spectrum.so"
-    library_win32="visualization.spectrum.dll"
+    library_windx="visualization.spectrum.dll"
     library_osx="visualization.spectrum.so"
     library_android="libvisualization.spectrum.so" />
   <extension point="xbmc.addon.metadata">
