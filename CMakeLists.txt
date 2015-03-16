@@ -13,26 +13,27 @@ if(WIN32)
   set(SPECTRUM_SOURCES src/directx_spectrum.cpp)
   set(DEPLIBS ${DIRECTX_D3DX9_LIBRARY})
 else(WIN32)
-  # Locate XBMC bindings
-  find_path(XBMC_INCLUDE_DIR xbmc/xbmc_addon_dll.h)
-
-  find_package(OpenGLES)
-  if(OPENGLES_FOUND)
-    set(INCLUDES ${OPENGLES_INCLUDE_DIR})
-    add_definitions(-DHAS_GLES)
-    set(SPECTRUM_SOURCES src/opengl_spectrum.cpp
-                         src/VisGUIShader.cpp
-                         src/VisMatrixGLES.cpp
-                         src/VisShader.cpp)
-    set(DEPLIBS ${OPENGLES_LIBRARIES})
-  else()
-    find_package(OpenGL REQUIRED)
+  find_package(OpenGL)
+  if(OPENGL_FOUND)
     find_package(GLEW REQUIRED)
     set(INCLUDES ${OpenGL_INCLUDE_DIR}
                  ${GLEW_INCLUDE_DIR})
     add_definitions(-DHAS_SDL_OPENGL)
     set(SPECTRUM_SOURCES src/opengl_spectrum.cpp)
     set(DEPLIBS ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})
+  else()
+    find_package(OpenGLES2)
+    if(OPENGLES2_FOUND)
+      set(INCLUDES ${OPENGLES2_INCLUDE_DIR})
+      add_definitions(-DHAS_GLES2)
+      set(SPECTRUM_SOURCES src/opengl_spectrum.cpp
+                           src/VisGUIShader.cpp
+                           src/VisMatrixGLES.cpp
+                           src/VisShader.cpp)
+      set(DEPLIBS ${OPENGLES2_LIBRARIES})
+    else()
+      message(FATAL_ERROR "No rendering API found. Bailing")
+    endif()
   endif()
 endif()
 
