@@ -18,7 +18,7 @@ else(WIN32)
     find_package(GLEW REQUIRED)
     set(INCLUDES ${OpenGL_INCLUDE_DIR}
                  ${GLEW_INCLUDE_DIR})
-    add_definitions(-DHAS_SDL_OPENGL)
+    add_definitions(-DHAS_OPENGL)
     set(SPECTRUM_SOURCES src/opengl_spectrum.cpp)
     set(DEPLIBS ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})
   else()

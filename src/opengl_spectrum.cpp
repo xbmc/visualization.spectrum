@@ -36,7 +36,7 @@
 #include <math.h>
 #include <stdint.h>
 
-#if defined(HAS_GLES)
+#if defined(HAS_GLES2)
 #include "VisGUIShader.h"
 
 #ifndef M_PI
@@ -88,7 +88,7 @@ const char *vert = "attribute vec4 m_attrpos;\n"
 
 CVisGUIShader *vis_shader = NULL;
 
-#elif defined(HAS_SDL_OPENGL)
+#elif defined(HAS_OPENGL)
 #include <GL/glew.h>
 GLenum  g_mode = GL_FILL;
 
@@ -102,7 +102,7 @@ GLfloat z_angle = 0.0, z_speed = 0.0;
 GLfloat heights[16][16], cHeights[16][16], scale;
 GLfloat hSpeed = 0.05;
 
-#if defined(HAS_SDL_OPENGL)
+#if defined(HAS_OPENGL)
 void draw_rectangle(GLfloat x1, GLfloat y1, GLfloat z1, GLfloat x2, GLfloat y2, GLfloat z2)
 {
   if(y1 == y2)
@@ -156,7 +156,7 @@ void draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, G
   draw_rectangle(x_offset + width, 0.0, z_offset , x_offset + width, height, z_offset + 0.1);
 }
 
-#elif defined(HAS_GLES)
+#elif defined(HAS_GLES2)
 
 void draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue )
 {
@@ -273,7 +273,7 @@ ADDON_STATUS ADDON_Create(void* hdl, void* props)
 
   scale = 1.0 / log(256.0);
 
-#if defined(HAS_GLES)
+#if defined(HAS_GLES2)
   vis_shader = new CVisGUIShader(vert, frag);
 
   if(!vis_shader)
@@ -451,7 +451,7 @@ extern "C" void ADDON_Stop()
 //-----------------------------------------------------------------------------
 extern "C" void ADDON_Destroy()
 {
-#if defined(HAS_GLES)
+#if defined(HAS_GLES2)
   if(vis_shader) 
   {
     vis_shader->Free();
@@ -561,7 +561,7 @@ extern "C" ADDON_STATUS ADDON_SetSetting(const char *strSetting, const void* val
   }
   else if (strcmp(strSetting, "mode")==0)
   {
-#if defined(HAS_SDL_OPENGL)
+#if defined(HAS_OPENGL)
     switch (*(int*) value)
     {
       case 1:
