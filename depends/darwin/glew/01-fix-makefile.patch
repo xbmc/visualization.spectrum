@@ -5,8 +5,8 @@
 -CC = cc
 -LD = cc
 -CFLAGS.EXTRA = -no-cpp-precomp -dynamic -fno-common
-+CC = $(CC)
-+LD = $(CC)
++CC = $(LOCALCC)
++LD = $(LOCALCC)
 +CFLAGS.EXTRA = $(CFLAGS)
  PICFLAG = -fPIC
 -LDFLAGS.EXTRA =
