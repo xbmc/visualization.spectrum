@@ -9,19 +9,18 @@ externalproject_add(glew
                     SOURCE_DIR ${CMAKE_SOURCE_DIR}
                     UPDATE_COMMAND ""
                     CONFIGURE_COMMAND ""
-                    BUILD_COMMAND LOCALCC=${CMAKE_C_COMPILER}
+                    BUILD_COMMAND make
+                                  LOCALCC=${CMAKE_C_COMPILER}
                                   SYSTEM=darwin
                                   GLEW_DEST=${CMAKE_INSTALL_PREFIX}
-                                  LOCALCFLAGS=\"${CMAKE_C_FLAGS}\"
-                                  LOCALLDFLAGS=\"$ENV{LDFLAGS}\"
-                                  make
+                                  "LOCALCFLAGS=${CMAKE_C_FLAGS}"
+                                  "LOCALLDFLAGS=${CMAKE_LD_FLAGS}"
                     INSTALL_COMMAND ""
                     BUILD_IN_SOURCE 1)
 
-install(CODE "execute_process(COMMAND LOCALCC=${CMAKE_C_COMPILER}
+install(CODE "execute_process(COMMAND make -C ${PROJECT_SOURCE_DIR} install
+                                      LOCALCC=${CMAKE_C_COMPILER}
                                       SYSTEM=darwin
                                       GLEW_DEST=${CMAKE_INSTALL_PREFIX}
-                                      LOCALCFLAGS=\"${CMAKE_C_FLAGS}\"
-                                      LOCALLDFLAGS=\"$ENV{LDFLAGS}\"
-                                      make install
-                              WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})")
+                                      \"LOCALCFLAGS=${CMAKE_C_FLAGS}\"
+                                      \"LOCALLDFLAGS=${CMAKE_LD_FLAGS}\")")
