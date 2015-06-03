@@ -31,7 +31,7 @@
 
 #define __STDC_LIMIT_MACROS
 
-#include <kodi/xbmc_vis_dll.h>
+#include <xbmc_vis_dll.h>
 #include <string.h>
 #include <math.h>
 #include <stdint.h>

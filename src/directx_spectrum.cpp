@@ -28,7 +28,7 @@
  */
 
 
-#include "kodi/xbmc_vis_dll.h"
+#include "xbmc_vis_dll.h"
 #include <math.h>
 #include <d3d11_1.h>
 #include <DirectXMath.h>
