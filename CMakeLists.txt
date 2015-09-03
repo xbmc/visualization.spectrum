@@ -37,7 +37,7 @@ else(WIN32)
   if(OPENGL_FOUND)
     find_package(GLEW REQUIRED)
     set(INCLUDES ${OpenGL_INCLUDE_DIR}
-                 ${GLEW_INCLUDE_DIR})
+                 ${GLEW_INCLUDE_DIRS})
     add_definitions(-DHAS_OPENGL)
     set(SPECTRUM_SOURCES src/opengl_spectrum.cpp)
     set(DEPLIBS ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})
