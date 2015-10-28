@@ -89,7 +89,7 @@ const char *vert = "attribute vec4 m_attrpos;\n"
 CVisGUIShader *vis_shader = NULL;
 
 #elif defined(HAS_OPENGL)
-#include <GL/glew.h>
+#include <GL/gl.h>
 GLenum  g_mode = GL_FILL;
 
 #endif
