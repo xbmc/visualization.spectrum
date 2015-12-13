@@ -186,7 +186,7 @@ void CVisMatrixGLES::Rotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
   MultMatrixf(matrix);
 }
 
-#if defined(__ARM_NEON__)
+#if defined(__ARM_NEON__) && !defined(__arm64__)
   
 inline void Matrix4Mul(const float* src_mat_1, const float* src_mat_2, float* dst_mat)
 {
