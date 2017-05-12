@@ -48,6 +48,11 @@ else(WIN32)
                            src/VisGUIShader.cpp
                            src/VisMatrixGLES.cpp
                            src/VisShader.cpp)
+
+      set(SPECTRUM_HEADERS src/opengl_spectrum.h
+                           src/VisGUIShader.h
+                           src/VisMatrixGLES.h
+                           src/VisShader.h)
       set(DEPLIBS ${OPENGLES2_LIBRARIES})
     else()
       message(FATAL_ERROR "No rendering API found. Bailing")
