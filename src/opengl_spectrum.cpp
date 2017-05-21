@@ -445,7 +445,7 @@ extern "C" bool IsLocked()
 // This dll must cease all runtime activities
 // !!! Add-on master function !!!
 //-----------------------------------------------------------------------------
-extern "C" void ADDON_Stop()
+extern "C" void Stop()
 {
 }
 
