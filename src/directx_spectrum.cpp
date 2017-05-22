@@ -304,7 +304,7 @@ ADDON_STATUS ADDON_Create(void* hdl, void* visProps)
   if (!visProps)
     return ADDON_STATUS_UNKNOWN;
 
-  VIS_PROPS* props = (VIS_PROPS*) visProps;
+  AddonProps_Visualization* props = (AddonProps_Visualization*) visProps;
   g_context = (ID3D11DeviceContext*)props->device;
   g_context->GetDevice(&g_device);
 
@@ -490,7 +490,7 @@ extern "C" bool IsLocked()
 // This dll must stop all runtime activities
 // !!! Add-on master function !!!
 //-----------------------------------------------------------------------------
-extern "C" void ADDON_Stop()
+extern "C" void Stop()
 {
 }
 
