@@ -24,14 +24,14 @@
 
 /*
  *  Ported to XBMC by d4rk
- *  Also added 'hSpeed' to animate transition between bar heights
+ *  Also added 'm_hSpeed' to animate transition between bar heights
  *
  *  Ported to GLES 2.0 by Gimli
  */
 
 #define __STDC_LIMIT_MACROS
 
-#include <xbmc_vis_dll.h>
+#include <kodi/addon-instance/Visualization.h>
 #include <string.h>
 #include <math.h>
 #include <stdint.h>
@@ -48,19 +48,17 @@
 #define GL_PROJECTION             MM_PROJECTION
 #define GL_MODELVIEW              MM_MODELVIEW
 
-#define glPushMatrix()            vis_shader->PushMatrix()
-#define glPopMatrix()             vis_shader->PopMatrix()
-#define glTranslatef(x,y,z)       vis_shader->Translatef(x,y,z)
-#define glRotatef(a,x,y,z)        vis_shader->Rotatef(DEG2RAD(a),x,y,z)
+#define glPushMatrix()            m_visShader->PushMatrix()
+#define glPopMatrix()             m_visShader->PopMatrix()
+#define glTranslatef(x,y,z)       m_visShader->Translatef(x,y,z)
+#define glRotatef(a,x,y,z)        m_visShader->Rotatef(DEG2RAD(a),x,y,z)
 #define glPolygonMode(a,b)        ;
-#define glBegin(a)                vis_shader->Enable()
-#define glEnd()                   vis_shader->Disable()
-#define glMatrixMode(a)           vis_shader->MatrixMode(a)
-#define glLoadIdentity()          vis_shader->LoadIdentity()
-#define glFrustum(a,b,c,d,e,f)    vis_shader->Frustum(a,b,c,d,e,f)
+#define glBegin(a)                m_visShader->Enable()
+#define glEnd()                   m_visShader->Disable()
+#define glMatrixMode(a)           m_visShader->MatrixMode(a)
+#define glLoadIdentity()          m_visShader->LoadIdentity()
+#define glFrustum(a,b,c,d,e,f)    m_visShader->Frustum(a,b,c,d,e,f)
 
-GLenum  g_mode = GL_TRIANGLES;
-float g_fWaveform[2][512];
 const char *frag = "precision mediump float; \n"
                    "varying lowp vec4 m_colour; \n"
                    "void main () \n"
@@ -86,28 +84,100 @@ const char *vert = "attribute vec4 m_attrpos;\n"
                    "  m_cord1     = m_attrcord1;\n"
                    "}\n";
 
-CVisGUIShader *vis_shader = NULL;
-
 #elif defined(HAS_OPENGL)
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
 #else
 #include <GL/gl.h>
 #endif
-GLenum  g_mode = GL_FILL;
-
 #endif
 
 #define NUM_BANDS 16
 
-GLfloat x_angle = 20.0, x_speed = 0.0;
-GLfloat y_angle = 45.0, y_speed = 0.5;
-GLfloat z_angle = 0.0, z_speed = 0.0;
-GLfloat heights[16][16], cHeights[16][16], scale;
-GLfloat hSpeed = 0.05;
+class CVisualizationSpectrum
+  : public kodi::addon::CAddonBase,
+    public kodi::addon::CInstanceVisualization
+{
+public:
+  CVisualizationSpectrum();
+  virtual ~CVisualizationSpectrum();
+
+  virtual bool Start(int channels, int samplesPerSec, int bitsPerSample, std::string songName) override;
+  virtual void Render() override;
+  virtual void AudioData(const float* audioData, int audioDataLength, float *freqData, int freqDataLength) override;
+  virtual ADDON_STATUS SetSetting(const std::string& settingName, const kodi::CSettingValue& settingValue) override;
+
+private:
+  void SetBarHeightSetting(int settingValue);
+  void SetSpeedSetting(int settingValue);
+  void SetModeSetting(int settingValue);
+
+  GLfloat m_heights[16][16], m_cHeights[16][16], m_scale;
+  GLenum m_mode;
+  float m_y_angle, m_y_speed;
+  float m_x_angle, m_x_speed;
+  float m_z_angle, m_z_speed;
+  float m_hSpeed;
+
+#if defined(HAS_GLES2)
+  CVisGUIShader *m_visShader;
+#endif
+#if defined(HAS_OPENGL)
+  void draw_rectangle(GLfloat x1, GLfloat y1, GLfloat z1, GLfloat x2, GLfloat y2, GLfloat z2);
+#endif
+#if defined(HAS_GLES2) || defined(HAS_OPENGL)
+  void draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue );
+#endif
+  void draw_bars(void);
+};
+
+CVisualizationSpectrum::CVisualizationSpectrum()
+#if defined(HAS_GLES2)
+  : m_mode(GL_TRIANGLES),
+#elif defined(HAS_OPENGL)
+  : m_mode(GL_FILL),
+#endif
+    m_y_angle(45.0f),
+    m_y_speed(0.5f),
+    m_x_angle(20.0f),
+    m_x_speed(0.0f),
+    m_z_angle(0.0f),
+    m_z_speed(0.0f),
+    m_hSpeed(0.05f)
+{
+  m_scale = 1.0 / log(256.0);
+
+  SetBarHeightSetting(kodi::GetSettingInt("bar_height"));
+  SetSpeedSetting(kodi::GetSettingInt("speed"));
+  SetModeSetting(kodi::GetSettingInt("mode"));
+
+#if defined(HAS_GLES2)
+  m_visShader = new CVisGUIShader(vert, frag);
+
+  if(!m_visShader)
+    return ADDON_STATUS_UNKNOWN;
+
+  if(!m_visShader->CompileAndLink())
+  {
+    delete m_visShader;
+    return ADDON_STATUS_UNKNOWN;
+  }
+#endif
+}
+
+CVisualizationSpectrum::~CVisualizationSpectrum()
+{
+#if defined(HAS_GLES2)
+  if(m_visShader) 
+  {
+    m_visShader->Free();
+    delete m_visShader;
+  }
+#endif
+}
 
 #if defined(HAS_OPENGL)
-void draw_rectangle(GLfloat x1, GLfloat y1, GLfloat z1, GLfloat x2, GLfloat y2, GLfloat z2)
+void CVisualizationSpectrum::draw_rectangle(GLfloat x1, GLfloat y1, GLfloat z1, GLfloat x2, GLfloat y2, GLfloat z2)
 {
   if(y1 == y2)
   {
@@ -131,28 +201,28 @@ void draw_rectangle(GLfloat x1, GLfloat y1, GLfloat z1, GLfloat x2, GLfloat y2, 
   }
 }
 
-void draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue )
+void CVisualizationSpectrum::draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue )
 {
   GLfloat width = 0.1;
 
-  if (g_mode == GL_POINT)
+  if (m_mode == GL_POINT)
     glColor3f(0.2, 1.0, 0.2);
 
-  if (g_mode != GL_POINT)
+  if (m_mode != GL_POINT)
   {
     glColor3f(red,green,blue);
     draw_rectangle(x_offset, height, z_offset, x_offset + width, height, z_offset + 0.1);
   }
   draw_rectangle(x_offset, 0, z_offset, x_offset + width, 0, z_offset + 0.1);
 
-  if (g_mode != GL_POINT)
+  if (m_mode != GL_POINT)
   {
     glColor3f(0.5 * red, 0.5 * green, 0.5 * blue);
     draw_rectangle(x_offset, 0.0, z_offset + 0.1, x_offset + width, height, z_offset + 0.1);
   }
   draw_rectangle(x_offset, 0.0, z_offset, x_offset + width, height, z_offset );
 
-  if (g_mode != GL_POINT)
+  if (m_mode != GL_POINT)
   {
     glColor3f(0.25 * red, 0.25 * green, 0.25 * blue);
     draw_rectangle(x_offset, 0.0, z_offset , x_offset, height, z_offset + 0.1);
@@ -162,7 +232,7 @@ void draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, G
 
 #elif defined(HAS_GLES2)
 
-void draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue )
+void CVisualizationSpectrum::draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue )
 {
   // avoid zero sized bars, which results in overlapping triangles of same depth and display artefacts
   height = std::max(height, 1e-3f);
@@ -209,8 +279,8 @@ void draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, G
                       4, 6, 7
                    };
 
-  GLint   posLoc = vis_shader->GetPosLoc();
-  GLint   colLoc = vis_shader->GetColLoc();
+  GLint   posLoc = m_visShader->GetPosLoc();
+  GLint   colLoc = m_visShader->GetColLoc();
 
   glVertexAttribPointer(colLoc, 3, GL_FLOAT, 0, 0, col);
   glVertexAttribPointer(posLoc, 3, GL_FLOAT, 0, 0, ver);
@@ -218,14 +288,14 @@ void draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, G
   glEnableVertexAttribArray(posLoc);
   glEnableVertexAttribArray(colLoc);
 
-  glDrawElements(g_mode, 36, GL_UNSIGNED_BYTE, idx);
+  glDrawElements(m_mode, 36, GL_UNSIGNED_BYTE, idx);
 
   glDisableVertexAttribArray(posLoc);
   glDisableVertexAttribArray(colLoc);
 }
 #endif
 
-void draw_bars(void)
+void CVisualizationSpectrum::draw_bars(void)
 {
   int x,y;
   GLfloat x_offset, z_offset, r_base, b_base;
@@ -233,11 +303,11 @@ void draw_bars(void)
   glClear(GL_DEPTH_BUFFER_BIT);
   glPushMatrix();
   glTranslatef(0.0,-0.5,-5.0);
-  glRotatef(x_angle,1.0,0.0,0.0);
-  glRotatef(y_angle,0.0,1.0,0.0);
-  glRotatef(z_angle,0.0,0.0,1.0);
+  glRotatef(m_x_angle,1.0,0.0,0.0);
+  glRotatef(m_y_angle,0.0,1.0,0.0);
+  glRotatef(m_z_angle,0.0,0.0,1.0);
   
-  glPolygonMode(GL_FRONT_AND_BACK, g_mode);
+  glPolygonMode(GL_FRONT_AND_BACK, m_mode);
   glBegin(GL_TRIANGLES);
   
   for(y = 0; y < 16; y++)
@@ -250,15 +320,15 @@ void draw_bars(void)
     for(x = 0; x < 16; x++)
     {
       x_offset = -1.6 + ((float)x * 0.2);
-      if (::fabs(cHeights[y][x]-heights[y][x])>hSpeed)
+      if (::fabs(m_cHeights[y][x]-m_heights[y][x])>m_hSpeed)
       {
-        if (cHeights[y][x]<heights[y][x])
-          cHeights[y][x] += hSpeed;
+        if (m_cHeights[y][x]<m_heights[y][x])
+          m_cHeights[y][x] += m_hSpeed;
         else
-          cHeights[y][x] -= hSpeed;
+          m_cHeights[y][x] -= m_hSpeed;
       }
       draw_bar(x_offset, z_offset,
-        cHeights[y][x], r_base - (float(x) * (r_base / 15.0)),
+        m_cHeights[y][x], r_base - (float(x) * (r_base / 15.0)),
         (float)x * (1.0 / 15), b_base);
     }
   }
@@ -267,38 +337,10 @@ void draw_bars(void)
   glPopMatrix();
 }
 
-//-- Create -------------------------------------------------------------------
-// Called on load. Addon should fully initalize or return error status
-//-----------------------------------------------------------------------------
-ADDON_STATUS ADDON_Create(void* hdl, void* props)
-{
-  if (!props)
-    return ADDON_STATUS_UNKNOWN;
-
-  scale = 1.0 / log(256.0);
-
-#if defined(HAS_GLES2)
-  vis_shader = new CVisGUIShader(vert, frag);
-
-  if(!vis_shader)
-    return ADDON_STATUS_UNKNOWN;
-
-  if(!vis_shader->CompileAndLink())
-  {
-    delete vis_shader;
-    return ADDON_STATUS_UNKNOWN;
-  }  
-#endif
-
-  scale = 1.0 / log(256.0);
-
-  return ADDON_STATUS_NEED_SETTINGS;
-}
-
 //-- Render -------------------------------------------------------------------
 // Called once per frame. Do all rendering here.
 //-----------------------------------------------------------------------------
-extern "C" void Render()
+void CVisualizationSpectrum::Render()
 {
   glDisable(GL_BLEND);
   glMatrixMode(GL_PROJECTION);
@@ -312,17 +354,17 @@ extern "C" void Render()
   glDepthFunc(GL_LESS);
   glPolygonMode(GL_FRONT, GL_FILL);
   //glPolygonMode(GL_BACK, GL_FILL);
-  x_angle += x_speed;
-  if(x_angle >= 360.0)
-    x_angle -= 360.0;
+  m_x_angle += m_x_speed;
+  if(m_x_angle >= 360.0)
+    m_x_angle -= 360.0;
 
-  y_angle += y_speed;
-  if(y_angle >= 360.0)
-    y_angle -= 360.0;
+  m_y_angle += m_y_speed;
+  if(m_y_angle >= 360.0)
+    m_y_angle -= 360.0;
 
-  z_angle += z_speed;
-  if(z_angle >= 360.0)
-    z_angle -= 360.0;
+  m_z_angle += m_z_speed;
+  if(m_z_angle >= 360.0)
+    m_z_angle -= 360.0;
 
   draw_bars();
   glPopMatrix();
@@ -332,7 +374,7 @@ extern "C" void Render()
   glEnable(GL_BLEND);
 }
 
-extern "C" void Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, const char* szSongName)
+bool CVisualizationSpectrum::Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, std::string szSongName)
 {
   int x, y;
 
@@ -340,19 +382,21 @@ extern "C" void Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, con
   {
     for(y = 0; y < 16; y++)
     {
-      cHeights[y][x] = 0.0;
+      m_cHeights[y][x] = 0.0;
     }
   }
 
-  x_speed = 0.0;
-  y_speed = 0.5;
-  z_speed = 0.0;
-  x_angle = 20.0;
-  y_angle = 45.0;
-  z_angle = 0.0;
+  m_x_speed = 0.0;
+  m_y_speed = 0.5;
+  m_z_speed = 0.0;
+  m_x_angle = 20.0;
+  m_y_angle = 45.0;
+  m_z_angle = 0.0;
+
+  return true;
 }
 
-extern "C" void AudioData(const float* pAudioData, int iAudioDataLength, float *pFreqData, int iFreqDataLength)
+void CVisualizationSpectrum::AudioData(const float* pAudioData, int iAudioDataLength, float *pFreqData, int iFreqDataLength)
 {
   int i,c;
   int y=0;
@@ -364,7 +408,7 @@ extern "C" void AudioData(const float* pAudioData, int iAudioDataLength, float *
   {
     for(i = 0; i < 16; i++)
     {
-      heights[y][i] = heights[y - 1][i];
+      m_heights[y][i] = m_heights[y - 1][i];
     }
   }
 
@@ -382,199 +426,130 @@ extern "C" void AudioData(const float* pAudioData, int iAudioDataLength, float *
     }
     y >>= 7;
     if(y > 0)
-      val = (logf(y) * scale);
+      val = (logf(y) * m_scale);
     else
       val = 0;
-    heights[0][i] = val;
+    m_heights[0][i] = val;
   }
 }
 
-
-//-- GetInfo ------------------------------------------------------------------
-// Tell XBMC our requirements
-//-----------------------------------------------------------------------------
-extern "C" void GetInfo(VIS_INFO* pInfo)
+void CVisualizationSpectrum::SetBarHeightSetting(int settingValue)
 {
-  pInfo->bWantsFreq = false;
-  pInfo->iSyncDelay = 0;
-}
-
-
-//-- GetSubModules ------------------------------------------------------------
-// Return any sub modules supported by this vis
-//-----------------------------------------------------------------------------
-extern "C" unsigned int GetSubModules(char ***names)
-{
-  return 0; // this vis supports 0 sub modules
-}
-
-//-- OnAction -----------------------------------------------------------------
-// Handle XBMC actions such as next preset, lock preset, album art changed etc
-//-----------------------------------------------------------------------------
-extern "C" bool OnAction(long flags, const void *param)
-{
-  bool ret = false;
-  return ret;
-}
-
-//-- GetPresets ---------------------------------------------------------------
-// Return a list of presets to XBMC for display
-//-----------------------------------------------------------------------------
-extern "C" unsigned int GetPresets(char ***presets)
-{
-  return 0;
-}
-
-//-- GetPreset ----------------------------------------------------------------
-// Return the index of the current playing preset
-//-----------------------------------------------------------------------------
-extern "C" unsigned GetPreset()
-{
-  return 0;
-}
-
-//-- IsLocked -----------------------------------------------------------------
-// Returns true if this add-on use settings
-//-----------------------------------------------------------------------------
-extern "C" bool IsLocked()
-{
-  return false;
-}
-
-//-- Stop ---------------------------------------------------------------------
-// This dll must cease all runtime activities
-// !!! Add-on master function !!!
-//-----------------------------------------------------------------------------
-extern "C" void Stop()
-{
-}
-
-//-- Destroy ------------------------------------------------------------------
-// Do everything before unload of this add-on
-// !!! Add-on master function !!!
-//-----------------------------------------------------------------------------
-extern "C" void ADDON_Destroy()
-{
-#if defined(HAS_GLES2)
-  if(vis_shader) 
+  switch (settingValue)
   {
-    vis_shader->Free();
-    delete vis_shader;
+  case 1://standard
+    m_scale = 1.f / log(256.f);
+    break;
+
+  case 2://big
+    m_scale = 2.f / log(256.f);
+    break;
+
+  case 3://real big
+    m_scale = 3.f / log(256.f);
+    break;
+
+  case 4://unused
+    m_scale = 0.33f / log(256.f);
+    break;
+
+  case 0://small
+  default:
+    m_scale = 0.5f / log(256.f);
+    break;
+  }
+}
+
+void CVisualizationSpectrum::SetSpeedSetting(int settingValue)
+{
+  switch (settingValue)
+  {
+  case 1:
+    m_hSpeed = 0.025f;
+    break;
+
+  case 2:
+    m_hSpeed = 0.0125f;
+    break;
+
+  case 3:
+    m_hSpeed = 0.1f;
+    break;
+
+  case 4:
+    m_hSpeed = 0.2f;
+    break;
+
+  case 0:
+  default:
+    m_hSpeed = 0.05f;
+    break;
+  }
+}
+
+void CVisualizationSpectrum::SetModeSetting(int settingValue)
+{
+#if defined(HAS_OPENGL)
+  switch (settingValue)
+  {
+    case 1:
+      m_mode = GL_LINE;
+      break;
+
+    case 2:
+      m_mode = GL_POINT;
+      break;
+
+    case 0:
+    default:
+      m_mode = GL_FILL;
+      break;
+  }
+#else
+  switch (settingValue)
+  {
+    case 1:
+      m_mode = GL_LINE_LOOP;
+      break;
+
+    case 2:
+      m_mode = GL_LINES; //no points on gles!
+      break;
+
+    case 0:
+    default:
+      m_mode = GL_TRIANGLES;
+      break;
   }
 #endif
-}
-
-//-- GetStatus ---------------------------------------------------------------
-// Returns the current Status of this visualisation
-// !!! Add-on master function !!!
-//-----------------------------------------------------------------------------
-extern "C" ADDON_STATUS ADDON_GetStatus()
-{
-  return ADDON_STATUS_OK;
 }
 
 //-- SetSetting ---------------------------------------------------------------
 // Set a specific Setting value (called from XBMC)
 // !!! Add-on master function !!!
 //-----------------------------------------------------------------------------
-extern "C" ADDON_STATUS ADDON_SetSetting(const char *strSetting, const void* value)
+ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName, const kodi::CSettingValue& settingValue)
 {
-  if (!strSetting || !value)
+  if (settingName.empty() || settingValue.empty())
     return ADDON_STATUS_UNKNOWN;
 
-  if (strcmp(strSetting, "bar_height")==0)
+  if (settingName == "bar_height")
   {
-    switch (*(int*) value)
-    {
-    case 1://standard
-      scale = 1.f / log(256.f);
-      break;
-
-    case 2://big
-      scale = 2.f / log(256.f);
-      break;
-
-    case 3://real big
-      scale = 3.f / log(256.f);
-      break;
-
-    case 4://unused
-      scale = 0.33f / log(256.f);
-      break;
-
-    case 0://small
-    default:
-      scale = 0.5f / log(256.f);
-      break;
-    }
+    SetBarHeightSetting(settingValue.GetInt());
     return ADDON_STATUS_OK;
   }
-  else if (strcmp(strSetting, "speed")==0)
+  else if (settingName == "speed")
   {
-    switch (*(int*) value)
-    {
-    case 1:
-      hSpeed = 0.025f;
-      break;
-
-    case 2:
-      hSpeed = 0.0125f;
-      break;
-
-    case 3:
-      hSpeed = 0.1f;
-      break;
-
-    case 4:
-      hSpeed = 0.2f;
-      break;
-
-    case 0:
-    default:
-      hSpeed = 0.05f;
-      break;
-    }
+    SetSpeedSetting(settingValue.GetInt());
     return ADDON_STATUS_OK;
   }
-  else if (strcmp(strSetting, "mode")==0)
+  else if (settingName == "mode")
   {
-#if defined(HAS_OPENGL)
-    switch (*(int*) value)
-    {
-      case 1:
-        g_mode = GL_LINE;
-        break;
-
-      case 2:
-        g_mode = GL_POINT;
-        break;
-
-      case 0:
-      default:
-        g_mode = GL_FILL;
-        break;
-    }
-#else
-    switch (*(int*) value)
-    {
-      case 1:
-        g_mode = GL_LINE_LOOP;
-        break;
-
-      case 2:
-        g_mode = GL_LINES; //no points on gles!
-        break;
-
-      case 0:
-      default:
-        g_mode = GL_TRIANGLES;
-        break;
-    }
-
-#endif
-
+    SetModeSetting(settingValue.GetInt());
     return ADDON_STATUS_OK;
   }
 
   return ADDON_STATUS_UNKNOWN;
 }
+
+ADDONCREATOR(CVisualizationSpectrum)
