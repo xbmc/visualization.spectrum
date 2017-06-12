@@ -153,26 +153,14 @@ CVisualizationSpectrum::CVisualizationSpectrum()
 
 #if defined(HAS_GLES2)
   m_visShader = new CVisGUIShader(vert, frag);
-
-  if(!m_visShader)
-    return ADDON_STATUS_UNKNOWN;
-
-  if(!m_visShader->CompileAndLink())
-  {
-    delete m_visShader;
-    return ADDON_STATUS_UNKNOWN;
-  }
 #endif
 }
 
 CVisualizationSpectrum::~CVisualizationSpectrum()
 {
 #if defined(HAS_GLES2)
-  if(m_visShader) 
-  {
-    m_visShader->Free();
-    delete m_visShader;
-  }
+  m_visShader->Free();
+  delete m_visShader;
 #endif
 }
 
@@ -376,6 +364,14 @@ void CVisualizationSpectrum::Render()
 
 bool CVisualizationSpectrum::Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, std::string szSongName)
 {
+#if defined(HAS_GLES2)
+  if (!m_visShader->CompileAndLink())
+  {
+    kodi::Log(ADDON_LOG_ERROR, "Failed to create Open GL ES 2.0 visualization GUI shader");
+    return false;
+  }
+#endif
+
   int x, y;
 
   for(x = 0; x < 16; x++)
