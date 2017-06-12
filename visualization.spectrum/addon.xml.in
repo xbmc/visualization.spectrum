@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <addon
   id="visualization.spectrum"
-  version="1.1.4"
+  version="2.0.0"
   name="Spectrum"
   provider-name="Team XBMC">
   <requires>@ADDON_DEPENDS@</requires>
@@ -90,5 +90,11 @@
     <description lang="zh">Spectrum可视化效果是渲染的一个旋转的三维频谱分析图像，频谱矩阵随着音乐节拍而象波浪起伏。&#10;你还可以设置频谱棒的高度、变换速度、以及呈现效果（固体、点、框架）。这是一个不错的轻量级，低CPU使用率的可视化效果。</description>
     <description lang="zh_TW"> Spectrum 是使用  描繪顯示旋轉的3D頻譜分析視覺效果，頻譜格線隨著音樂節拍而像波浪起伏。&#10;它還可以調整頻譜長條的高度、速度以及呈現效果（實心、點狀、線框）。它是個很好的輕量級、低 CPU 使用率的視覺化效果。</description>
     <platform>@PLATFORM@</platform>
+    <assets>
+      <icon>resources/icon.png</icon>
+      <screenshot>resources/screenshot-01.png</screenshot>
+      <screenshot>resources/screenshot-02.png</screenshot>
+      <screenshot>resources/screenshot-03.png</screenshot>
+    </assets>
   </extension>
 </addon>
