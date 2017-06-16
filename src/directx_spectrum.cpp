@@ -84,7 +84,7 @@ private:
   void SetSpeedSetting(int settingValue);
   void SetModeSetting(int settingValue);
 
-  GLfloat heights[16][16], cHeights[16][16], scale;
+  float heights[16][16], cHeights[16][16], m_scale;
   DWORD m_mode; // D3DFILL_SOLID;
   float m_y_angle, m_y_speed;
   float m_x_angle, m_x_speed;
@@ -137,7 +137,7 @@ CVisualizationSpectrum::CVisualizationSpectrum()
     m_omBlend(nullptr),
     m_omDepth(nullptr)
 {
-  m_context = (ID3D11DeviceContext*)GetDevice();
+  m_context = (ID3D11DeviceContext*)Device();
   m_context->GetDevice(&m_device);
 
   SetBarHeightSetting(kodi::GetSettingInt("bar_height"));
@@ -240,7 +240,7 @@ void CVisualizationSpectrum::Render()
   }
 }
 
-bool CVisualizationSpectrum::Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, const char* szSongName)
+bool CVisualizationSpectrum::Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, std::string szSongName)
 {
   int x, y;
 
@@ -252,7 +252,7 @@ bool CVisualizationSpectrum::Start(int iChannels, int iSamplesPerSec, int iBitsP
     }
   }
 
-  scale = 1.0f / log(256.0f);
+  m_scale = 1.0f / log(256.0f);
 
   m_x_speed = 0.0f;
   m_y_speed = 0.5f;
@@ -294,7 +294,7 @@ void CVisualizationSpectrum::AudioData(const float* pAudioData, int iAudioDataLe
     }
     y >>= 7;
     if(y > 0)
-      val = (logf((float)y) * scale);
+      val = (logf((float)y) * m_scale);
     else
       val = 0;
     heights[0][i] = val;
