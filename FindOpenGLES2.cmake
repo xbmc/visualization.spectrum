@@ -20,25 +20,12 @@ if(NOT OPENGLES2_FOUND)
       /usr/include
       /opt/vc/include
     )
-
-    find_library(OPENGLES2_gl_LIBRARY
-      NAMES GLESv2
-      PATHS /usr/lib
-      /opt/vc/lib
-    )
-
-    find_library(OPENGLES2_egl_LIBRARY
-      NAMES EGL
-      PATHS /usr/lib
-      /opt/vc/lib
-    )
   endif()
 
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(OpenGLES2 DEFAULT_MSG
-    OPENGLES2_INCLUDE_DIRS OPENGLES2_gl_LIBRARY OPENGLES2_egl_LIBRARY)
+    OPENGLES2_INCLUDE_DIRS)
 
-  set(OPENGLES2_LIBRARIES ${OPENGLES2_gl_LIBRARY} ${OPENGLES2_egl_LIBRARY})
 endif(NOT OPENGLES2_FOUND)
 
 mark_as_advanced(

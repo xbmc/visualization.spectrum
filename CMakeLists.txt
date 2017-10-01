@@ -46,7 +46,6 @@ else(WIN32)
                          src/VisGUIShader.h
                          src/VisMatrixGLES.h
                          src/VisShader.h)
-    set(DEPLIBS ${OPENGLES2_LIBRARIES})
   find_package(OpenGL)
   else()
     if(OPENGL_FOUND)
