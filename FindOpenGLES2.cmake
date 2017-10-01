@@ -16,9 +16,22 @@ if(NOT OPENGLES2_FOUND)
     set(OPENGLES2_INCLUDE_DIRS ${OPENGLES2_gl_LIBRARY}/Headers)
     set(OPENGLES2_egl_LIBRARY ${OPENGLES2_gl_LIBRARY})
   else()
-    find_path(OPENGLES2_INCLUDE_DIRS GLES2/gl2.h)
-    find_library(OPENGLES2_gl_LIBRARY NAMES GLESv2)
-    find_library(OPENGLES2_egl_LIBRARY NAMES EGL)
+    find_path(OPENGLES2_INCLUDE_DIRS GLES2/gl2.h
+      /usr/include
+      /opt/vc/include
+    )
+
+    find_library(OPENGLES2_gl_LIBRARY
+      NAMES GLESv2
+      PATHS /usr/lib
+      /opt/vc/lib
+    )
+
+    find_library(OPENGLES2_egl_LIBRARY
+      NAMES EGL
+      PATHS /usr/lib
+      /opt/vc/lib
+    )
   endif()
 
   include(FindPackageHandleStandardArgs)
