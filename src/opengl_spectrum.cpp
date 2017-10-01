@@ -33,6 +33,7 @@
 
 #include <kodi/addon-instance/Visualization.h>
 #include <string.h>
+#include <stdlib.h>
 #include <math.h>
 #include <stdint.h>
 
@@ -121,12 +122,16 @@ private:
 
 #if defined(HAS_GLES2)
   CVisGUIShader *m_visShader;
+  GLfloat  *m_col;
+  GLfloat  *m_ver;
+  GLushort *m_idx;
+  void init_bars(void);
 #endif
 #if defined(HAS_OPENGL)
   void draw_rectangle(GLfloat x1, GLfloat y1, GLfloat z1, GLfloat x2, GLfloat y2, GLfloat z2);
 #endif
 #if defined(HAS_GLES2) || defined(HAS_OPENGL)
-  void draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue );
+  void draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue, int index);
 #endif
   void draw_bars(void);
 };
@@ -153,6 +158,9 @@ CVisualizationSpectrum::CVisualizationSpectrum()
 
 #if defined(HAS_GLES2)
   m_visShader = new CVisGUIShader(vert, frag);
+  m_col = (GLfloat  *)malloc(16*16*3*8 * sizeof(GLfloat *));
+  m_ver = (GLfloat  *)malloc(16*16*3*8 * sizeof(GLfloat *));
+  m_idx = (GLushort *)malloc(16*16*36  * sizeof(GLushort *));
 #endif
 }
 
@@ -161,6 +169,12 @@ CVisualizationSpectrum::~CVisualizationSpectrum()
 #if defined(HAS_GLES2)
   m_visShader->Free();
   delete m_visShader;
+  free(m_col);
+  free(m_ver);
+  free(m_idx);
+  m_col = nullptr;
+  m_ver = nullptr;
+  m_idx = nullptr;
 #endif
 }
 
@@ -189,7 +203,7 @@ void CVisualizationSpectrum::draw_rectangle(GLfloat x1, GLfloat y1, GLfloat z1, 
   }
 }
 
-void CVisualizationSpectrum::draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue )
+void CVisualizationSpectrum::draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue, int index)
 {
   GLfloat width = 0.1;
 
@@ -220,66 +234,98 @@ void CVisualizationSpectrum::draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloa
 
 #elif defined(HAS_GLES2)
 
-void CVisualizationSpectrum::draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue )
+void CVisualizationSpectrum::draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue, int index)
 {
+  if (!m_col || !m_ver || !m_idx)
+    return;
+
   // avoid zero sized bars, which results in overlapping triangles of same depth and display artefacts
   height = std::max(height, 1e-3f);
 
-  GLfloat col[] =  {
-                      red * 0.1f, green * 0.1f, blue * 0.1f,
-                      red * 0.2f, green * 0.2f, blue * 0.2f,
-                      red * 0.3f, green * 0.3f, blue * 0.3f,
-                      red * 0.4f, green * 0.4f, blue * 0.4f,
-                      red * 0.5f, green * 0.5f, blue * 0.5f,
-                      red * 0.6f, green * 0.6f, blue * 0.6f,
-                      red * 0.7f, green * 0.7f, blue * 0.7f,
-                      red * 0.8f, green * 0.8f, blue *0.8f
-                   };
-  GLfloat ver[] =  {
-                      x_offset + 0.0f, 0.0f,    z_offset + 0.0f,
-                      x_offset + 0.1f, 0.0f,    z_offset + 0.0f,
-                      x_offset + 0.1f, 0.0f,    z_offset + 0.1f,
-                      x_offset + 0.0f, 0.0f,    z_offset + 0.1f,
-                      x_offset + 0.0f, height,  z_offset + 0.0f,
-                      x_offset + 0.1f, height,  z_offset + 0.0f,
-                      x_offset + 0.1f, height,  z_offset + 0.1f,
-                      x_offset + 0.0f, height,  z_offset + 0.1f
-                   };
+  GLfloat *ver = m_ver + 3 * 8 * index;
+  // just need to update the height vertex, all else is the same
+  for (int i=0; i<8; i++)
+  {
+    ver[1] = (((i+0)>>2)&1) * height;
+    ver += 3;
+  }
+  // on last index, draw the object
+  if (index == 16*16-1)
+  {
+    GLint   posLoc = m_visShader->GetPosLoc();
+    GLint   colLoc = m_visShader->GetColLoc();
 
-  GLubyte idx[] =  {
-                      // Bottom
-                      0, 1, 2,
-                      0, 2, 3,
-                      // Left
-                      0, 4, 7,
-                      0, 7, 3,
-                      // Back
-                      3, 7, 6,
-                      3, 6, 2,
-                      // Right
-                      1, 5, 6,
-                      1, 6, 2,
-                      // Front
-                      0, 4, 5,
-                      0, 5, 1,
-                      // Top
-                      4, 5, 6,
-                      4, 6, 7
-                   };
+    glVertexAttribPointer(colLoc, 3, GL_FLOAT, 0, 0, m_col);
+    glVertexAttribPointer(posLoc, 3, GL_FLOAT, 0, 0, m_ver);
 
-  GLint   posLoc = m_visShader->GetPosLoc();
-  GLint   colLoc = m_visShader->GetColLoc();
+    glEnableVertexAttribArray(posLoc);
+    glEnableVertexAttribArray(colLoc);
 
-  glVertexAttribPointer(colLoc, 3, GL_FLOAT, 0, 0, col);
-  glVertexAttribPointer(posLoc, 3, GL_FLOAT, 0, 0, ver);
+    glDrawElements(m_mode, 16*16*36, GL_UNSIGNED_SHORT, m_idx);
 
-  glEnableVertexAttribArray(posLoc);
-  glEnableVertexAttribArray(colLoc);
+    glDisableVertexAttribArray(posLoc);
+    glDisableVertexAttribArray(colLoc);
+  }
+}
 
-  glDrawElements(m_mode, 36, GL_UNSIGNED_BYTE, idx);
+void CVisualizationSpectrum::init_bars(void)
+{
+  if (!m_col || !m_ver || !m_idx)
+    return;
 
-  glDisableVertexAttribArray(posLoc);
-  glDisableVertexAttribArray(colLoc);
+  GLfloat x_offset, z_offset, r_base, b_base;
+  for(int y = 0; y < 16; y++)
+  {
+    z_offset = -1.6 + ((15 - y) * 0.2);
+
+    b_base = y * (1.0 / 15);
+    r_base = 1.0 - b_base;
+
+    for(int x = 0; x < 16; x++)
+    {
+      x_offset = -1.6 + ((float)x * 0.2);
+
+      GLfloat red = r_base - (float(x) * (r_base / 15.0));
+      GLfloat green = (float)x * (1.0 / 15);
+      GLfloat blue = b_base;
+      int index = 16*y+x;
+      GLfloat *col = m_col + 3 * 8 * index;
+      for (int i=0; i<8; i++)
+      {
+        float scale = 0.1f * i;
+        *col++ = red   * scale;
+        *col++ = green * scale;
+        *col++ = blue  * scale;
+      }
+      GLfloat *ver = m_ver + 3 * 8 * index;
+      for (int i=0; i<8; i++)
+      {
+        *ver++ = x_offset + (((i+1)>>1)&1) * 0.1f;
+        *ver++ = 0; // height - filled in later
+        *ver++ = z_offset + (((i+0)>>1)&1) * 0.1f;
+      }
+      GLushort *idx = m_idx + 36 * index;
+      GLushort startidx = 8 * index;
+      // Bottom
+      *idx++ = startidx + 0; *idx++ = startidx + 1; *idx++ = startidx + 2;
+      *idx++ = startidx + 0; *idx++ = startidx + 2; *idx++ = startidx + 3;
+      // Left
+      *idx++ = startidx + 0; *idx++ = startidx + 4; *idx++ = startidx + 7;
+      *idx++ = startidx + 0; *idx++ = startidx + 7; *idx++ = startidx + 3;
+      // Back
+      *idx++ = startidx + 3; *idx++ = startidx + 7; *idx++ = startidx + 6;
+      *idx++ = startidx + 3; *idx++ = startidx + 6; *idx++ = startidx + 2;
+      // Right
+      *idx++ = startidx + 1; *idx++ = startidx + 5; *idx++ = startidx + 6;
+      *idx++ = startidx + 1; *idx++ = startidx + 6; *idx++ = startidx + 2;
+      // Front
+      *idx++ = startidx + 0; *idx++ = startidx + 4; *idx++ = startidx + 5;
+      *idx++ = startidx + 0; *idx++ = startidx + 5; *idx++ = startidx + 1;
+      // Top
+      *idx++ = startidx + 4; *idx++ = startidx + 5; *idx++ = startidx + 6;
+      *idx++ = startidx + 4; *idx++ = startidx + 6; *idx++ = startidx + 7;
+    }
+  }
 }
 #endif
 
@@ -317,7 +363,7 @@ void CVisualizationSpectrum::draw_bars(void)
       }
       draw_bar(x_offset, z_offset,
         m_cHeights[y][x], r_base - (float(x) * (r_base / 15.0)),
-        (float)x * (1.0 / 15), b_base);
+        (float)x * (1.0 / 15), b_base, 16*y+x);
     }
   }
   glEnd();
@@ -370,6 +416,7 @@ bool CVisualizationSpectrum::Start(int iChannels, int iSamplesPerSec, int iBitsP
     kodi::Log(ADDON_LOG_ERROR, "Failed to create Open GL ES 2.0 visualization GUI shader");
     return false;
   }
+  init_bars();
 #endif
 
   int x, y;
