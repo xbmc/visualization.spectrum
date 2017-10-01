@@ -59,14 +59,14 @@
 #define glLoadIdentity()          m_visShader->LoadIdentity()
 #define glFrustum(a,b,c,d,e,f)    m_visShader->Frustum(a,b,c,d,e,f)
 
-const char *frag = "precision mediump float; \n"
+static const char *frag = "precision mediump float; \n"
                    "varying lowp vec4 m_colour; \n"
                    "void main () \n"
                    "{ \n"
                    "  gl_FragColor = m_colour; \n"
                    "}\n";
 
-const char *vert = "attribute vec4 m_attrpos;\n"
+static const char *vert = "attribute vec4 m_attrpos;\n"
                    "attribute vec4 m_attrcol;\n"
                    "attribute vec4 m_attrcord0;\n"
                    "attribute vec4 m_attrcord1;\n"
