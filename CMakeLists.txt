@@ -33,27 +33,27 @@ if(WIN32)
   add_custom_target(generate ALL DEPENDS ${SHADER_INCLUDES})
   set(SPECTRUM_SOURCES src/directx_spectrum.cpp)
 else(WIN32)
-  find_package(OpenGL)
-  if(OPENGL_FOUND)
-    set(INCLUDES ${OPENGL_INCLUDE_DIR})
-    add_definitions(-DHAS_OPENGL)
-    set(SPECTRUM_SOURCES src/opengl_spectrum.cpp)
-    set(DEPLIBS ${OPENGL_LIBRARIES})
-  else()
-    find_package(OpenGLES2)
-    if(OPENGLES2_FOUND)
-      set(INCLUDES ${OPENGLES2_INCLUDE_DIR})
-      add_definitions(-DHAS_GLES2)
-      set(SPECTRUM_SOURCES src/opengl_spectrum.cpp
-                           src/VisGUIShader.cpp
-                           src/VisMatrixGLES.cpp
-                           src/VisShader.cpp)
+  find_package(OpenGLES2)
+  if(OPENGLES2_FOUND)
+    set(INCLUDES ${OPENGLES2_INCLUDE_DIRS})
+    add_definitions(-DHAS_GLES2)
+    set(SPECTRUM_SOURCES src/opengl_spectrum.cpp
+                         src/VisGUIShader.cpp
+                         src/VisMatrixGLES.cpp
+                         src/VisShader.cpp)
 
-      set(SPECTRUM_HEADERS src/opengl_spectrum.h
-                           src/VisGUIShader.h
-                           src/VisMatrixGLES.h
-                           src/VisShader.h)
-      set(DEPLIBS ${OPENGLES2_LIBRARIES})
+    set(SPECTRUM_HEADERS src/opengl_spectrum.h
+                         src/VisGUIShader.h
+                         src/VisMatrixGLES.h
+                         src/VisShader.h)
+    set(DEPLIBS ${OPENGLES2_LIBRARIES})
+  find_package(OpenGL)
+  else()
+    if(OPENGL_FOUND)
+      set(INCLUDES ${OPENGL_INCLUDE_DIR})
+      add_definitions(-DHAS_OPENGL)
+      set(SPECTRUM_SOURCES src/opengl_spectrum.cpp)
+      set(DEPLIBS ${OPENGL_LIBRARIES})
     else()
       message(FATAL_ERROR "No rendering API found. Bailing")
     endif()
