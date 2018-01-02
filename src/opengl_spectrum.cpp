@@ -35,54 +35,13 @@
 #include <string.h>
 #include <math.h>
 #include <stdint.h>
+#include "shaders/GUIShader.h"
 
 #if defined(HAS_GLES2)
-#include "VisGUIShader.h"
 
 #ifndef M_PI
 #define M_PI       3.141592654f
 #endif
-#define DEG2RAD(d) ( (d) * M_PI/180.0f )
-
-//OpenGL wrapper - allows us to use same code of functions draw_bars and render
-#define GL_PROJECTION             MM_PROJECTION
-#define GL_MODELVIEW              MM_MODELVIEW
-
-#define glPushMatrix()            m_visShader->PushMatrix()
-#define glPopMatrix()             m_visShader->PopMatrix()
-#define glTranslatef(x,y,z)       m_visShader->Translatef(x,y,z)
-#define glRotatef(a,x,y,z)        m_visShader->Rotatef(DEG2RAD(a),x,y,z)
-#define glPolygonMode(a,b)        ;
-#define glBegin(a)                m_visShader->Enable()
-#define glEnd()                   m_visShader->Disable()
-#define glMatrixMode(a)           m_visShader->MatrixMode(a)
-#define glLoadIdentity()          m_visShader->LoadIdentity()
-#define glFrustum(a,b,c,d,e,f)    m_visShader->Frustum(a,b,c,d,e,f)
-
-const char *frag = "precision mediump float; \n"
-                   "varying lowp vec4 m_colour; \n"
-                   "void main () \n"
-                   "{ \n"
-                   "  gl_FragColor = m_colour; \n"
-                   "}\n";
-
-const char *vert = "attribute vec4 m_attrpos;\n"
-                   "attribute vec4 m_attrcol;\n"
-                   "attribute vec4 m_attrcord0;\n"
-                   "attribute vec4 m_attrcord1;\n"
-                   "varying vec4   m_cord0;\n"
-                   "varying vec4   m_cord1;\n"
-                   "varying lowp   vec4 m_colour;\n"
-                   "uniform mat4   m_proj;\n"
-                   "uniform mat4   m_model;\n"
-                   "void main ()\n"
-                   "{\n"
-                   "  mat4 mvp    = m_proj * m_model;\n"
-                   "  gl_Position = mvp * m_attrpos;\n"
-                   "  m_colour    = m_attrcol;\n"
-                   "  m_cord0     = m_attrcord0;\n"
-                   "  m_cord1     = m_attrcord1;\n"
-                   "}\n";
 
 #elif defined(HAS_OPENGL)
 #ifdef __APPLE__
@@ -93,6 +52,8 @@ const char *vert = "attribute vec4 m_attrpos;\n"
 #endif
 
 #define NUM_BANDS 16
+#define DEG2RAD(d) ( (d) * M_PI/180.0f )
+#define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 class CVisualizationSpectrum
   : public kodi::addon::CAddonBase,
@@ -112,31 +73,23 @@ private:
   void SetSpeedSetting(int settingValue);
   void SetModeSetting(int settingValue);
 
-  GLfloat m_heights[16][16], m_cHeights[16][16], m_scale;
+  GLfloat m_heights[16][16];
+  GLfloat m_cHeights[16][16];
+  GLfloat m_scale;
   GLenum m_mode;
   float m_y_angle, m_y_speed;
   float m_x_angle, m_x_speed;
   float m_z_angle, m_z_speed;
   float m_hSpeed;
 
-#if defined(HAS_GLES2)
-  CVisGUIShader *m_visShader;
-#endif
-#if defined(HAS_OPENGL)
-  void draw_rectangle(GLfloat x1, GLfloat y1, GLfloat z1, GLfloat x2, GLfloat y2, GLfloat z2);
-#endif
-#if defined(HAS_GLES2) || defined(HAS_OPENGL)
+  CGUIShader *m_shader;
+
   void draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue );
-#endif
   void draw_bars(void);
 };
 
 CVisualizationSpectrum::CVisualizationSpectrum()
-#if defined(HAS_GLES2)
   : m_mode(GL_TRIANGLES),
-#elif defined(HAS_OPENGL)
-  : m_mode(GL_FILL),
-#endif
     m_y_angle(45.0f),
     m_y_speed(0.5f),
     m_x_angle(20.0f),
@@ -151,100 +104,22 @@ CVisualizationSpectrum::CVisualizationSpectrum()
   SetSpeedSetting(kodi::GetSettingInt("speed"));
   SetModeSetting(kodi::GetSettingInt("mode"));
 
-#if defined(HAS_GLES2)
-  m_visShader = new CVisGUIShader(vert, frag);
-#endif
+  m_shader = new CGUIShader("vert.glsl", "frag.glsl");
 }
 
 CVisualizationSpectrum::~CVisualizationSpectrum()
 {
-#if defined(HAS_GLES2)
-  m_visShader->Free();
-  delete m_visShader;
-#endif
+  m_shader->Free();
+  delete m_shader;
 }
-
-#if defined(HAS_OPENGL)
-void CVisualizationSpectrum::draw_rectangle(GLfloat x1, GLfloat y1, GLfloat z1, GLfloat x2, GLfloat y2, GLfloat z2)
-{
-  if(y1 == y2)
-  {
-    glVertex3f(x1, y1, z1);
-    glVertex3f(x2, y1, z1);
-    glVertex3f(x2, y2, z2);
-
-    glVertex3f(x2, y2, z2);
-    glVertex3f(x1, y2, z2);
-    glVertex3f(x1, y1, z1);
-  }
-  else
-  {
-    glVertex3f(x1, y1, z1);
-    glVertex3f(x2, y1, z2);
-    glVertex3f(x2, y2, z2);
-
-    glVertex3f(x2, y2, z2);
-    glVertex3f(x1, y2, z1);
-    glVertex3f(x1, y1, z1);
-  }
-}
-
-void CVisualizationSpectrum::draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue )
-{
-  GLfloat width = 0.1;
-
-  if (m_mode == GL_POINT)
-    glColor3f(0.2, 1.0, 0.2);
-
-  if (m_mode != GL_POINT)
-  {
-    glColor3f(red,green,blue);
-    draw_rectangle(x_offset, height, z_offset, x_offset + width, height, z_offset + 0.1);
-  }
-  draw_rectangle(x_offset, 0, z_offset, x_offset + width, 0, z_offset + 0.1);
-
-  if (m_mode != GL_POINT)
-  {
-    glColor3f(0.5 * red, 0.5 * green, 0.5 * blue);
-    draw_rectangle(x_offset, 0.0, z_offset + 0.1, x_offset + width, height, z_offset + 0.1);
-  }
-  draw_rectangle(x_offset, 0.0, z_offset, x_offset + width, height, z_offset );
-
-  if (m_mode != GL_POINT)
-  {
-    glColor3f(0.25 * red, 0.25 * green, 0.25 * blue);
-    draw_rectangle(x_offset, 0.0, z_offset , x_offset, height, z_offset + 0.1);
-  }
-  draw_rectangle(x_offset + width, 0.0, z_offset , x_offset + width, height, z_offset + 0.1);
-}
-
-#elif defined(HAS_GLES2)
 
 void CVisualizationSpectrum::draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue )
 {
   // avoid zero sized bars, which results in overlapping triangles of same depth and display artefacts
   height = std::max(height, 1e-3f);
 
-  GLfloat col[] =  {
-                      red * 0.1f, green * 0.1f, blue * 0.1f,
-                      red * 0.2f, green * 0.2f, blue * 0.2f,
-                      red * 0.3f, green * 0.3f, blue * 0.3f,
-                      red * 0.4f, green * 0.4f, blue * 0.4f,
-                      red * 0.5f, green * 0.5f, blue * 0.5f,
-                      red * 0.6f, green * 0.6f, blue * 0.6f,
-                      red * 0.7f, green * 0.7f, blue * 0.7f,
-                      red * 0.8f, green * 0.8f, blue *0.8f
-                   };
-  GLfloat ver[] =  {
-                      x_offset + 0.0f, 0.0f,    z_offset + 0.0f,
-                      x_offset + 0.1f, 0.0f,    z_offset + 0.0f,
-                      x_offset + 0.1f, 0.0f,    z_offset + 0.1f,
-                      x_offset + 0.0f, 0.0f,    z_offset + 0.1f,
-                      x_offset + 0.0f, height,  z_offset + 0.0f,
-                      x_offset + 0.1f, height,  z_offset + 0.0f,
-                      x_offset + 0.1f, height,  z_offset + 0.1f,
-                      x_offset + 0.0f, height,  z_offset + 0.1f
-                   };
+  GLint posLoc = m_shader->GetPosLoc();
+  GLint colLoc = m_shader->GetColLoc();
 
   GLubyte idx[] =  {
                       // Bottom
@@ -267,8 +142,114 @@ void CVisualizationSpectrum::draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloa
                       4, 6, 7
                    };
 
-  GLint   posLoc = m_visShader->GetPosLoc();
-  GLint   colLoc = m_visShader->GetColLoc();
+#if defined (HAS_OPENGL)
+
+  struct PackedVertex
+  {
+	GLfloat x, y, z;
+	GLfloat r, g, b;
+  }vertex[8];
+
+  vertex[0].x = x_offset + 0.0f;
+  vertex[0].y = 0.0f;
+  vertex[0].z = z_offset + 0.0f;
+  vertex[1].x = x_offset + 0.1f;
+  vertex[1].y = 0.0f;
+  vertex[1].z = z_offset + 0.0f;
+  vertex[2].x = x_offset + 0.1f;
+  vertex[2].y = 0.0f;
+  vertex[2].z = z_offset + 0.1f;
+  vertex[3].x = x_offset + 0.0f;
+  vertex[3].y = 0.0f;
+  vertex[3].z = z_offset + 0.1f;
+
+  vertex[4].x = x_offset + 0.0f;
+  vertex[4].y = height;
+  vertex[4].z = z_offset + 0.0f;
+  vertex[5].x = x_offset + 0.1f;
+  vertex[5].y = height;
+  vertex[5].z = z_offset + 0.0f;
+  vertex[6].x = x_offset + 0.1f;
+  vertex[6].y = height;
+  vertex[6].z = z_offset + 0.1f;
+  vertex[7].x = x_offset + 0.0f;
+  vertex[7].y = height;
+  vertex[7].z = z_offset + 0.1f;
+
+  vertex[0].r = red * 0.1f;
+  vertex[0].g = green * 0.1f;
+  vertex[0].b = blue * 0.1f;
+  vertex[1].r = red * 0.2f;
+  vertex[1].g = green * 0.2f;
+  vertex[1].b = blue * 0.2f;
+  vertex[2].r = red * 0.3f;
+  vertex[2].g = green * 0.3f;
+  vertex[2].b = blue * 0.3f;
+  vertex[3].r = red * 0.4f;
+  vertex[3].g = green * 0.4f;
+  vertex[3].b = blue * 0.4f;
+
+  vertex[4].r = red * 0.5f;
+  vertex[4].g = green * 0.5f;
+  vertex[4].b = blue * 0.5f;
+  vertex[5].r = red * 0.6f;
+  vertex[5].g = green * 0.6f;
+  vertex[5].b = blue * 0.6f;
+  vertex[6].r = red * 0.7f;
+  vertex[6].g = green * 0.7f;
+  vertex[6].b = blue * 0.7f;
+  vertex[7].r = red * 0.8f;
+  vertex[7].g = green * 0.8f;
+  vertex[7].b = blue * 0.8f;
+
+  GLuint vertexVBO;
+  GLuint indexVBO;
+
+  glGenBuffers(1, &vertexVBO);
+  glBindBuffer(GL_ARRAY_BUFFER, vertexVBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(PackedVertex)*8, &vertex[0], GL_STATIC_DRAW);
+
+  glVertexAttribPointer(posLoc, 3, GL_FLOAT, 0, sizeof(PackedVertex), BUFFER_OFFSET(offsetof(PackedVertex, x)));
+  glVertexAttribPointer(colLoc, 3, GL_FLOAT, 0, sizeof(PackedVertex), BUFFER_OFFSET(offsetof(PackedVertex, r)));
+
+  glEnableVertexAttribArray(posLoc);
+  glEnableVertexAttribArray(colLoc);
+
+  glGenBuffers(1, &indexVBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLubyte)*36, idx, GL_STATIC_DRAW);
+
+  glDrawElements(m_mode, 36, GL_UNSIGNED_BYTE, 0);
+
+  glDisableVertexAttribArray(posLoc);
+  glDisableVertexAttribArray(colLoc);
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glDeleteBuffers(1, &vertexVBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  glDeleteBuffers(1, &indexVBO);
+
+#else
+  GLfloat col[] =  {
+                      red * 0.1f, green * 0.1f, blue * 0.1f,
+                      red * 0.2f, green * 0.2f, blue * 0.2f,
+                      red * 0.3f, green * 0.3f, blue * 0.3f,
+                      red * 0.4f, green * 0.4f, blue * 0.4f,
+                      red * 0.5f, green * 0.5f, blue * 0.5f,
+                      red * 0.6f, green * 0.6f, blue * 0.6f,
+                      red * 0.7f, green * 0.7f, blue * 0.7f,
+                      red * 0.8f, green * 0.8f, blue * 0.8f
+                   };
+  GLfloat ver[] =  {
+                      x_offset + 0.0f, 0.0f,    z_offset + 0.0f,
+                      x_offset + 0.1f, 0.0f,    z_offset + 0.0f,
+                      x_offset + 0.1f, 0.0f,    z_offset + 0.1f,
+                      x_offset + 0.0f, 0.0f,    z_offset + 0.1f,
+                      x_offset + 0.0f, height,  z_offset + 0.0f,
+                      x_offset + 0.1f, height,  z_offset + 0.0f,
+                      x_offset + 0.1f, height,  z_offset + 0.1f,
+                      x_offset + 0.0f, height,  z_offset + 0.1f
+                   };
 
   glVertexAttribPointer(colLoc, 3, GL_FLOAT, 0, 0, col);
   glVertexAttribPointer(posLoc, 3, GL_FLOAT, 0, 0, ver);
@@ -280,8 +261,8 @@ void CVisualizationSpectrum::draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloa
 
   glDisableVertexAttribArray(posLoc);
   glDisableVertexAttribArray(colLoc);
-}
 #endif
+}
 
 void CVisualizationSpectrum::draw_bars(void)
 {
@@ -289,14 +270,13 @@ void CVisualizationSpectrum::draw_bars(void)
   GLfloat x_offset, z_offset, r_base, b_base;
 
   glClear(GL_DEPTH_BUFFER_BIT);
-  glPushMatrix();
-  glTranslatef(0.0,-0.5,-5.0);
-  glRotatef(m_x_angle,1.0,0.0,0.0);
-  glRotatef(m_y_angle,0.0,1.0,0.0);
-  glRotatef(m_z_angle,0.0,0.0,1.0);
+  m_shader->PushMatrix();
+  m_shader->Translatef(0.0,-0.5,-5.0);
+  m_shader->Rotatef(DEG2RAD(m_x_angle),1.0,0.0,0.0);
+  m_shader->Rotatef(DEG2RAD(m_y_angle),0.0,1.0,0.0);
+  m_shader->Rotatef(DEG2RAD(m_z_angle),0.0,0.0,1.0);
   
-  glPolygonMode(GL_FRONT_AND_BACK, m_mode);
-  glBegin(GL_TRIANGLES);
+  m_shader->Enable();
   
   for(y = 0; y < 16; y++)
   {
@@ -320,9 +300,9 @@ void CVisualizationSpectrum::draw_bars(void)
         (float)x * (1.0 / 15), b_base);
     }
   }
-  glEnd();
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  glPopMatrix();
+  m_shader->Disable();
+
+  m_shader->PopMatrix();
 }
 
 //-- Render -------------------------------------------------------------------
@@ -331,17 +311,16 @@ void CVisualizationSpectrum::draw_bars(void)
 void CVisualizationSpectrum::Render()
 {
   glDisable(GL_BLEND);
-  glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
-  glLoadIdentity();
-  glFrustum(-1, 1, -1, 1, 1.5, 10);
-  glMatrixMode(GL_MODELVIEW);
-  glPushMatrix();
-  glLoadIdentity();
+  m_shader->MatrixMode(MM_PROJECTION);
+  m_shader->PushMatrix();
+  m_shader->LoadIdentity();
+  m_shader->Frustum(-1, 1, -1, 1, 1.5, 10);
+  m_shader->MatrixMode(MM_MODELVIEW);
+  m_shader->PushMatrix();
+  m_shader->LoadIdentity();
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
-  glPolygonMode(GL_FRONT, GL_FILL);
-  //glPolygonMode(GL_BACK, GL_FILL);
+
   m_x_angle += m_x_speed;
   if(m_x_angle >= 360.0)
     m_x_angle -= 360.0;
@@ -355,22 +334,20 @@ void CVisualizationSpectrum::Render()
     m_z_angle -= 360.0;
 
   draw_bars();
-  glPopMatrix();
-  glMatrixMode(GL_PROJECTION);
-  glPopMatrix();
+  m_shader->PopMatrix();
+  m_shader->MatrixMode(MM_PROJECTION);
+  m_shader->PopMatrix();
   glDisable(GL_DEPTH_TEST);
   glEnable(GL_BLEND);
 }
 
 bool CVisualizationSpectrum::Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, std::string szSongName)
 {
-#if defined(HAS_GLES2)
-  if (!m_visShader->CompileAndLink())
+  if (!m_shader->CompileAndLink())
   {
     kodi::Log(ADDON_LOG_ERROR, "Failed to create Open GL ES 2.0 visualization GUI shader");
     return false;
   }
-#endif
 
   int x, y;
 
@@ -485,23 +462,6 @@ void CVisualizationSpectrum::SetSpeedSetting(int settingValue)
 
 void CVisualizationSpectrum::SetModeSetting(int settingValue)
 {
-#if defined(HAS_OPENGL)
-  switch (settingValue)
-  {
-    case 1:
-      m_mode = GL_LINE;
-      break;
-
-    case 2:
-      m_mode = GL_POINT;
-      break;
-
-    case 0:
-    default:
-      m_mode = GL_FILL;
-      break;
-  }
-#else
   switch (settingValue)
   {
     case 1:
@@ -517,7 +477,6 @@ void CVisualizationSpectrum::SetModeSetting(int settingValue)
       m_mode = GL_TRIANGLES;
       break;
   }
-#endif
 }
 
 //-- SetSetting ---------------------------------------------------------------
