@@ -55,7 +55,7 @@
 #define DEG2RAD(d) ( (d) * M_PI/180.0f )
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
-class CVisualizationSpectrum
+class ATTRIBUTE_HIDDEN CVisualizationSpectrum
   : public kodi::addon::CAddonBase,
     public kodi::addon::CInstanceVisualization
 {
