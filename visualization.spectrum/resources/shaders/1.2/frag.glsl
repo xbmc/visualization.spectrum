@@ -1,4 +1,4 @@
-varying vec4 m_col;
+varying lowp vec4 m_col;
 
 void main ()
 {

@@ -22,7 +22,7 @@
 #include "Shader.h"
 #include "Matrix.h"
 
-class CGUIShader : public CShaderProgram, public CMatrix
+class ATTRIBUTE_HIDDEN CGUIShader : public CShaderProgram, public CMatrix
 {
 public:
   CGUIShader(std::string vert, std::string frag);
