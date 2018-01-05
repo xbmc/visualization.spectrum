@@ -7,6 +7,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR})
 find_package(Kodi REQUIRED)
 
 if(WIN32)
+  set(APP_RENDER_SYSTEM dx11)
   add_definitions(-DDIRECTX_SPEKTRUM_EXPORTS -D_WIN32PC -D_USRDLL)
   set(SHADER_FILES src/DefaultVertexShader.hlsl
                    src/DefaultPixelShader.hlsl)
@@ -33,8 +34,11 @@ if(WIN32)
   add_custom_target(generate ALL DEPENDS ${SHADER_INCLUDES})
   set(SPECTRUM_SOURCES src/directx_spectrum.cpp)
 else(WIN32)
-  find_package(OpenGL)
+  if(APP_RENDER_SYSTEM STREQUAL "gl" OR NOT APP_RENDER_SYSTEM)
+    find_package(OpenGL)
+  endif()
   if(OPENGL_FOUND)
+    set(APP_RENDER_SYSTEM gl)
     set(INCLUDES ${OPENGL_INCLUDE_DIR})
     add_definitions(-DHAS_OPENGL)
     set(SPECTRUM_SOURCES src/opengl_spectrum.cpp
@@ -49,6 +53,7 @@ else(WIN32)
   else()
     find_package(OpenGLES2)
     if(OPENGLES2_FOUND)
+      set(APP_RENDER_SYSTEM gles)
       set(INCLUDES ${OPENGLES2_INCLUDE_DIR})
       add_definitions(-DHAS_GLES2)
       set(SPECTRUM_SOURCES src/opengl_spectrum.cpp
@@ -66,6 +71,8 @@ else(WIN32)
     endif()
   endif()
 endif()
+
+message(STATUS "Configured render system: ${APP_RENDER_SYSTEM}")
 
 include_directories(${INCLUDES}
                     ${KODI_INCLUDE_DIR}/..) # Hack way with "/..", need bigger Kodi cmake rework to match right include ways (becomes done in future)
