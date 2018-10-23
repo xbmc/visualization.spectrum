@@ -3,7 +3,7 @@
   id="visualization.spectrum"
   version="2.0.3"
   name="Spectrum"
-  provider-name="Team XBMC">
+  provider-name="Team Kodi">
   <requires>@ADDON_DEPENDS@</requires>
   <extension
     point="xbmc.player.musicviz"
