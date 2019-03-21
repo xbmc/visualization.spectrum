@@ -1,11 +1,11 @@
 Source: kodi-visualization-spectrum
 Priority: extra
-Maintainer: Arne Morten Kvarving <spiff@xbmc.org>
-Build-Depends: debhelper (>= 8.0.0), cmake, kodi-addon-dev,
-               libgl1-mesa-dev, libglew-dev
-Standards-Version: 3.9.5
+Maintainer: Nobody <nobody@kodi.tv>
+Build-Depends: debhelper (>= 9.0.0), cmake, kodi-addon-dev,
+               libgles2-mesa-dev [arm64 armhf], libgl1-mesa-dev [i386 amd64]
+Standards-Version: 4.1.2
 Section: libs
-Homepage: http://xbmc.org
+Homepage: http://kodi.tv
 
 Package: kodi-visualization-spectrum
 Section: libs
