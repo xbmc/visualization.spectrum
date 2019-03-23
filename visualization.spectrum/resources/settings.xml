@@ -25,6 +25,12 @@
           </control>
           <dependencies>
             <dependency type="enable" setting="mode" operator="is">2</dependency>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
           </dependencies>
         </setting>
         <setting id="bar_height" type="integer" label="30004" help="0">
