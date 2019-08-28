@@ -32,43 +32,25 @@ if(WIN32)
   endforeach(SHADER_FILE)
   add_custom_target(generate ALL DEPENDS ${SHADER_INCLUDES})
   set(SPECTRUM_SOURCES src/directx_spectrum.cpp)
-else(WIN32)
-  if(APP_RENDER_SYSTEM STREQUAL "gl" OR NOT APP_RENDER_SYSTEM)
-    find_package(OpenGL)
-  endif()
-  if(OPENGL_FOUND)
-    set(APP_RENDER_SYSTEM gl)
-    set(INCLUDES ${OPENGL_INCLUDE_DIR})
-    add_definitions(-DHAS_OPENGL)
-    set(SPECTRUM_SOURCES src/opengl_spectrum.cpp
-                         src/shaders/GUIShader.cpp
-                         src/shaders/Matrix.cpp
-                         src/shaders/Shader.cpp)
-    set(SPECTRUM_HEADERS src/opengl_spectrum.h
-                         src/shaders/GUIShader.h
-                         src/shaders/Matrix.h
-                         src/shaders/Shader.h)
-    set(DEPLIBS ${OPENGL_LIBRARIES})
-  else()
-    find_package(OpenGLES2)
-    if(OPENGLES2_FOUND)
-      set(APP_RENDER_SYSTEM gles)
-      set(INCLUDES ${OPENGLES2_INCLUDE_DIR})
-      add_definitions(-DHAS_GLES2)
-      set(SPECTRUM_SOURCES src/opengl_spectrum.cpp
-                           src/shaders/GUIShader.cpp
-                           src/shaders/Matrix.cpp
-                           src/shaders/Shader.cpp)
+else()
+  find_package(glm REQUIRED)
 
-      set(SPECTRUM_HEADERS src/opengl_spectrum.h
-                           src/shaders/GUIShader.h
-                           src/shaders/Matrix.h
-                           src/shaders/Shader.h)
-      set(DEPLIBS ${OPENGLES2_LIBRARIES})
-    else()
-      message(FATAL_ERROR "No rendering API found. Bailing")
-    endif()
+  if(APP_RENDER_SYSTEM STREQUAL "gl" OR NOT APP_RENDER_SYSTEM)
+    find_package(OpenGl REQUIRED)
+    set(DEPLIBS ${OPENGL_LIBRARIES})
+    set(INCLUDES ${OPENGL_INCLUDE_DIR})
+    add_definitions(${OPENGL_DEFINITIONS})
+  elseif(APP_RENDER_SYSTEM STREQUAL "gles")
+    find_package(OpenGLES REQUIRED)
+    set(DEPLIBS ${OPENGLES_LIBRARIES})
+    set(INCLUDES ${OPENGLES_INCLUDE_DIR})
+    add_definitions(${OPENGLES_DEFINITIONS})
   endif()
+
+  set(SPECTRUM_SOURCES src/opengl_spectrum.cpp)
+
+  include_directories(${GLM_INCLUDE_DIR}
+                      ${PROJECT_SOURCE_DIR}/lib)
 endif()
 
 message(STATUS "Configured render system: ${APP_RENDER_SYSTEM}")
