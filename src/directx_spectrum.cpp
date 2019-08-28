@@ -86,7 +86,7 @@ private:
 
   float heights[16][16], cHeights[16][16], m_scale;
   DWORD m_mode; // D3DFILL_SOLID;
-  float m_y_angle, m_y_speed;
+  float m_y_angle, m_y_speed, m_y_fixedAngle;
   float m_x_angle, m_x_speed;
   float m_z_angle, m_z_speed;
   float m_hSpeed;
@@ -143,6 +143,7 @@ CVisualizationSpectrum::CVisualizationSpectrum()
   SetBarHeightSetting(kodi::GetSettingInt("bar_height"));
   SetSpeedSetting(kodi::GetSettingInt("speed"));
   SetModeSetting(kodi::GetSettingInt("mode"));
+  m_y_fixedAngle = kodi::GetSettingInt("rotation_angle");
 
   if (!init_renderer_objs())
     kodi::Log(ADDON_LOG_ERROR, "Failed to init DirectX");
@@ -213,9 +214,16 @@ void CVisualizationSpectrum::Render()
     if (m_x_angle >= 360.0f)
       m_x_angle -= 360.0f;
 
-    m_y_angle += m_y_speed;
-    if (m_y_angle >= 360.0f)
-      m_y_angle -= 360.0f;
+    if (m_y_fixedAngle < 0.0f)
+    {
+      m_y_angle += m_y_speed;
+      if(m_y_angle >= 360.0)
+        m_y_angle -= 360.0;
+    }
+    else
+    {
+      m_y_angle = m_y_fixedAngle;
+    }
 
     m_z_angle += m_z_speed;
     if (m_z_angle >= 360.0f)
@@ -396,6 +404,11 @@ ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName, 
   else if (settingName == "mode")
   {
     SetModeSetting(settingValue.GetInt());
+    return ADDON_STATUS_OK;
+  }
+  else if (settingName == "rotation_angle")
+  {
+    m_y_fixedAngle = settingValue.GetInt();
     return ADDON_STATUS_OK;
   }
 

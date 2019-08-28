@@ -77,3 +77,23 @@ msgstr ""
 msgctxt "#30014"
 msgid "Very Fast"
 msgstr ""
+
+msgctxt "#30015"
+msgid "Point size"
+msgstr ""
+
+msgctxt "#30016"
+msgid "%i pixel"
+msgstr ""
+
+msgctxt "#30017"
+msgid "Rotation position"
+msgstr ""
+
+msgctxt "#30018"
+msgid "%i°"
+msgstr ""
+
+msgctxt "#30019"
+msgid "Turn continuously"
+msgstr ""
