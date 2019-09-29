@@ -97,18 +97,18 @@ private:
   void draw_bars(void);
   bool init_renderer_objs();
 
-  ID3D11Device* m_device;
-  ID3D11DeviceContext* m_context;
-  ID3D11VertexShader* m_vShader;
-  ID3D11PixelShader* m_pShader;
-  ID3D11InputLayout* m_inputLayout;
-  ID3D11Buffer* m_vBuffer;
-  ID3D11Buffer* m_cViewProj;
-  ID3D11Buffer* m_cWorld;
-  ID3D11RasterizerState* m_rsStateSolid;
-  ID3D11RasterizerState* m_rsStateWire;
-  ID3D11BlendState* m_omBlend;
-  ID3D11DepthStencilState* m_omDepth;
+  ID3D11Device* m_device = nullptr;
+  ID3D11DeviceContext* m_context = nullptr;
+  ID3D11VertexShader* m_vShader = nullptr;
+  ID3D11PixelShader* m_pShader = nullptr;
+  ID3D11InputLayout* m_inputLayout = nullptr;
+  ID3D11Buffer* m_vBuffer = nullptr;
+  ID3D11Buffer* m_cViewProj = nullptr;
+  ID3D11Buffer* m_cWorld = nullptr;
+  ID3D11RasterizerState* m_rsStateSolid = nullptr;
+  ID3D11RasterizerState* m_rsStateWire = nullptr;
+  ID3D11BlendState* m_omBlend = nullptr;
+  ID3D11DepthStencilState* m_omDepth = nullptr;
 };
 
 //-- Create -------------------------------------------------------------------
@@ -123,19 +123,7 @@ CVisualizationSpectrum::CVisualizationSpectrum()
     m_x_speed(0.0f),
     m_z_angle(0.0f),
     m_z_speed(0.0f),
-    m_hSpeed(0.05f),
-    m_device(nullptr),
-    m_context(nullptr),
-    m_vShader(nullptr),
-    m_pShader(nullptr),
-    m_inputLayout(nullptr),
-    m_vBuffer(nullptr),
-    m_cViewProj(nullptr),
-    m_cWorld(nullptr),
-    m_rsStateSolid(nullptr),
-    m_rsStateWire(nullptr),
-    m_omBlend(nullptr),
-    m_omDepth(nullptr)
+    m_hSpeed(0.05f)
 {
   m_context = (ID3D11DeviceContext*)Device();
   m_context->GetDevice(&m_device);
