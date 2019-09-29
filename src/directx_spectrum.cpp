@@ -72,12 +72,12 @@ class CVisualizationSpectrum
 {
 public:
   CVisualizationSpectrum();
-  virtual ~CVisualizationSpectrum();
+  ~CVisualizationSpectrum() override;
 
-  virtual bool Start(int channels, int samplesPerSec, int bitsPerSample, std::string songName) override;
-  virtual void Render() override;
-  virtual void AudioData(const float* audioData, int audioDataLength, float *freqData, int freqDataLength) override;
-  virtual ADDON_STATUS SetSetting(const std::string& settingName, const kodi::CSettingValue& settingValue) override;
+  bool Start(int channels, int samplesPerSec, int bitsPerSample, std::string songName) override;
+  void Render() override;
+  void AudioData(const float* audioData, int audioDataLength, float *freqData, int freqDataLength) override;
+  ADDON_STATUS SetSetting(const std::string& settingName, const kodi::CSettingValue& settingValue) override;
 
 private:
   void SetBarHeightSetting(int settingValue);
