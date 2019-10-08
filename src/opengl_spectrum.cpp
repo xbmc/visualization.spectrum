@@ -87,8 +87,8 @@ private:
   glm::mat4 m_projMat;
   glm::mat4 m_modelMat;
   GLfloat m_pointSize = 0.0f;
-  std::vector<GLfloat> m_vertex_buffer_data;
-  std::vector<GLfloat> m_color_buffer_data;
+  std::vector<glm::vec3> m_vertex_buffer_data;
+  std::vector<glm::vec3> m_color_buffer_data;
 
 #ifdef HAS_GL
   GLuint m_vertexVBO[2] = {0};
@@ -119,6 +119,9 @@ CVisualizationSpectrum::CVisualizationSpectrum()
   SetSpeedSetting(kodi::GetSettingInt("speed"));
   SetModeSetting(kodi::GetSettingInt("mode"));
   m_y_fixedAngle = kodi::GetSettingInt("rotation_angle");
+
+  m_vertex_buffer_data.resize(48);
+  m_color_buffer_data.resize(48);
 }
 
 bool CVisualizationSpectrum::Start(int channels, int samplesPerSec, int bitsPerSample, std::string songName)
@@ -280,63 +283,63 @@ void CVisualizationSpectrum::draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloa
   m_vertex_buffer_data =
   {
     // Bottom
-    x_offset + width, 0.0f,   z_offset + width,
-    x_offset,         0.0f,   z_offset,
-    x_offset + width, 0.0f,   z_offset,
-    x_offset + width, 0.0f,   z_offset + width,
-    x_offset,         0.0f,   z_offset + width,
-    x_offset,         0.0f,   z_offset,
+    { x_offset + width, 0.0f,   z_offset + width },
+    { x_offset,         0.0f,   z_offset },
+    { x_offset + width, 0.0f,   z_offset },
+    { x_offset + width, 0.0f,   z_offset + width },
+    { x_offset,         0.0f,   z_offset + width },
+    { x_offset,         0.0f,   z_offset },
 
-    x_offset,         0.0f,   z_offset + width,
-    x_offset + width, 0.0f,   z_offset,
-    x_offset + width, 0.0f,   z_offset + width,
-    x_offset,         0.0f,   z_offset + width,
-    x_offset + width, 0.0f,   z_offset,
-    x_offset,         0.0f,   z_offset,
+    { x_offset,         0.0f,   z_offset + width },
+    { x_offset + width, 0.0f,   z_offset },
+    { x_offset + width, 0.0f,   z_offset + width },
+    { x_offset,         0.0f,   z_offset + width },
+    { x_offset + width, 0.0f,   z_offset },
+    { x_offset,         0.0f,   z_offset },
 
     // Side
-    x_offset,         0.0f,   z_offset,
-    x_offset,         0.0f,   z_offset + width,
-    x_offset,         height, z_offset + width,
-    x_offset,         0.0f,   z_offset,
-    x_offset,         height, z_offset + width,
-    x_offset,         height, z_offset,
+    { x_offset,         0.0f,   z_offset },
+    { x_offset,         0.0f,   z_offset + width },
+    { x_offset,         height, z_offset + width },
+    { x_offset,         0.0f,   z_offset },
+    { x_offset,         height, z_offset + width },
+    { x_offset,         height, z_offset },
 
-    x_offset + width, height, z_offset,
-    x_offset,         0.0f,   z_offset,
-    x_offset,         height, z_offset,
-    x_offset + width, height, z_offset,
-    x_offset + width, 0.0f,   z_offset,
-    x_offset,         0.0f,   z_offset,
+    { x_offset + width, height, z_offset },
+    { x_offset,         0.0f,   z_offset },
+    { x_offset,         height, z_offset },
+    { x_offset + width, height, z_offset },
+    { x_offset + width, 0.0f,   z_offset },
+    { x_offset,         0.0f,   z_offset },
 
-    x_offset,         height, z_offset + width,
-    x_offset,         0.0f,   z_offset + width,
-    x_offset + width, 0.0f,   z_offset + width,
-    x_offset + width, height, z_offset + width,
-    x_offset,         height, z_offset + width,
-    x_offset + width, 0.0f,   z_offset + width,
+    { x_offset,         height, z_offset + width },
+    { x_offset,         0.0f,   z_offset + width },
+    { x_offset + width, 0.0f,   z_offset + width },
+    { x_offset + width, height, z_offset + width },
+    { x_offset,         height, z_offset + width },
+    { x_offset + width, 0.0f,   z_offset + width },
 
-    x_offset + width, height, z_offset + width,
-    x_offset + width, 0.0f,   z_offset,
-    x_offset + width, height, z_offset,
-    x_offset + width, 0.0f,   z_offset,
-    x_offset + width, height, z_offset + width,
-    x_offset + width, 0.0f,   z_offset + width,
+    { x_offset + width, height, z_offset + width },
+    { x_offset + width, 0.0f,   z_offset },
+    { x_offset + width, height, z_offset },
+    { x_offset + width, 0.0f,   z_offset },
+    { x_offset + width, height, z_offset + width },
+    { x_offset + width, 0.0f,   z_offset + width },
 
     // Top
-    x_offset + width, height, z_offset + width,
-    x_offset + width, height, z_offset,
-    x_offset,         height, z_offset,
-    x_offset + width, height, z_offset + width,
-    x_offset,         height, z_offset,
-    x_offset,         height, z_offset + width,
+    { x_offset + width, height, z_offset + width },
+    { x_offset + width, height, z_offset },
+    { x_offset,         height, z_offset },
+    { x_offset + width, height, z_offset + width },
+    { x_offset,         height, z_offset },
+    { x_offset,         height, z_offset + width },
 
-    x_offset,         height, z_offset + width,
-    x_offset + width, height, z_offset,
-    x_offset,         height, z_offset,
-    x_offset + width, height, z_offset,
-    x_offset + width, height, z_offset + width,
-    x_offset,         height, z_offset + width,
+    { x_offset,         height, z_offset + width },
+    { x_offset + width, height, z_offset },
+    { x_offset,         height, z_offset },
+    { x_offset + width, height, z_offset },
+    { x_offset + width, height, z_offset + width },
+    { x_offset,         height, z_offset + width }
   };
 
   float sideMlpy1, sideMlpy2, sideMlpy3, sideMlpy4;
@@ -356,72 +359,72 @@ void CVisualizationSpectrum::draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloa
   m_color_buffer_data =
   {
     // Bottom
-    red, green, blue,
-    red, green, blue,
-    red, green, blue,
-    red, green, blue,
-    red, green, blue,
-    red, green, blue,
+    { red, green, blue },
+    { red, green, blue },
+    { red, green, blue },
+    { red, green, blue },
+    { red, green, blue },
+    { red, green, blue },
 
-    red, green, blue,
-    red, green, blue,
-    red, green, blue,
-    red, green, blue,
-    red, green, blue,
-    red, green, blue,
+    { red, green, blue },
+    { red, green, blue },
+    { red, green, blue },
+    { red, green, blue },
+    { red, green, blue },
+    { red, green, blue },
 
     // Side
-    red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1,
-    red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1,
-    red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1,
-    red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1,
-    red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1,
-    red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1,
+    { red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1 },
+    { red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1 },
+    { red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1 },
+    { red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1 },
+    { red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1 },
+    { red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1 },
 
-    red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2,
-    red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2,
-    red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2,
-    red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2,
-    red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2,
-    red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2,
+    { red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2 },
+    { red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2 },
+    { red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2 },
+    { red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2 },
+    { red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2 },
+    { red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2 },
 
-    red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3,
-    red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3,
-    red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3,
-    red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3,
-    red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3,
-    red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3,
+    { red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3 },
+    { red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3 },
+    { red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3 },
+    { red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3 },
+    { red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3 },
+    { red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3 },
 
-    red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4,
-    red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4,
-    red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4,
-    red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4,
-    red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4,
-    red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4,
+    { red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4 },
+    { red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4 },
+    { red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4 },
+    { red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4 },
+    { red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4 },
+    { red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4 },
 
     // Top
-    red, green, blue,
-    red, green, blue,
-    red, green, blue,
-    red, green, blue,
-    red, green, blue,
-    red, green, blue,
+    { red, green, blue },
+    { red, green, blue },
+    { red, green, blue },
+    { red, green, blue },
+    { red, green, blue },
+    { red, green, blue },
 
-    red, green, blue,
-    red, green, blue,
-    red, green, blue,
-    red, green, blue,
-    red, green, blue,
-    red, green, blue,
+    { red, green, blue },
+    { red, green, blue },
+    { red, green, blue },
+    { red, green, blue },
+    { red, green, blue },
+    { red, green, blue },
   };
 
 #ifdef HAS_GL
   glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO[0]);
-  glBufferData(GL_ARRAY_BUFFER, m_vertex_buffer_data.size()*sizeof(GLfloat), &m_vertex_buffer_data[0], GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, m_vertex_buffer_data.size()*sizeof(glm::vec3), &m_vertex_buffer_data[0], GL_STATIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO[1]);
-  glBufferData(GL_ARRAY_BUFFER, m_color_buffer_data.size()*sizeof(GLfloat), &m_color_buffer_data[0], GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, m_color_buffer_data.size()*sizeof(glm::vec3), &m_color_buffer_data[0], GL_STATIC_DRAW);
 #endif
-  glDrawArrays(m_mode, 0, 12*3 + 4*3); /* 12*3 indices starting at 0 -> 12 triangles + 4*3 to have on lines show correct */
+  glDrawArrays(m_mode, 0, m_vertex_buffer_data.size()); /* 12*3 indices starting at 0 -> 12 triangles + 4*3 to have on lines show correct */
 }
 
 void CVisualizationSpectrum::draw_bars(void)
