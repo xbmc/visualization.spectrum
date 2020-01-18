@@ -38,6 +38,7 @@
 #include <string.h>
 #include <math.h>
 #include <stdint.h>
+#include <cstddef>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
