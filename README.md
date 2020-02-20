@@ -3,7 +3,8 @@
 This is a [Kodi](https://kodi.tv) visualization addon.
 
 [![Build Status](https://travis-ci.org/xbmc/visualization.spectrum.svg?branch=Leia)](https://travis-ci.org/xbmc/visualization.spectrum/branches)
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/xbmc/visualization.spectrum?branch=Leia&svg=true)](https://ci.appveyor.com/project/xbmc/visualization-spectrum?branch=Leia)
+[![Build Status](https://dev.azure.com/teamkodi/binary-addons/_apis/build/status/xbmc.visualization.spectrum?branchName=Leia)](https://dev.azure.com/teamkodi/binary-addons/_build/latest?definitionId=33&branchName=Leia)
+<!--- [![Build Status](https://ci.appveyor.com/api/projects/status/github/xbmc/visualization.spectrum?branch=Leia&svg=true)](https://ci.appveyor.com/project/xbmc/visualization-spectrum?branch=Leia) -->
 
 ![screenshot](https://raw.githubusercontent.com/xbmc/visualization.spectrum/Leia/visualization.spectrum/resources/screenshot-01.jpg)
 
