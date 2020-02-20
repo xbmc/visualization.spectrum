@@ -3,7 +3,8 @@
 This is a [Kodi](https://kodi.tv) visualization addon.
 
 [![Build Status](https://travis-ci.org/xbmc/visualization.spectrum.svg?branch=Matrix)](https://travis-ci.org/xbmc/visualization.spectrum/branches)
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/xbmc/visualization.spectrum?branch=Matrix&svg=true)](https://ci.appveyor.com/project/xbmc/visualization-spectrum?branch=Matrix)
+[![Build Status](https://dev.azure.com/teamkodi/binary-addons/_apis/build/status/xbmc.visualization.spectrum?branchName=Matrix)](https://dev.azure.com/teamkodi/binary-addons/_build/latest?definitionId=33&branchName=Matrix)
+<!--- [![Build Status](https://ci.appveyor.com/api/projects/status/github/xbmc/visualization.spectrum?branch=Matrix&svg=true)](https://ci.appveyor.com/project/xbmc/visualization-spectrum?branch=Matrix) -->
 
 ![screenshot](https://raw.githubusercontent.com/xbmc/visualization.spectrum/Matrix/visualization.spectrum/resources/screenshot-01.jpg)
 
