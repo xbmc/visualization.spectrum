@@ -2,6 +2,7 @@
 
 This is a [Kodi](https://kodi.tv) visualization addon.
 
+[![License: GPL-2.0-or-later](https://img.shields.io/badge/License-GPL%20v2+-blue.svg)](LICENSE.md)
 [![Build Status](https://travis-ci.org/xbmc/visualization.spectrum.svg?branch=Matrix)](https://travis-ci.org/xbmc/visualization.spectrum/branches)
 [![Build Status](https://dev.azure.com/teamkodi/binary-addons/_apis/build/status/xbmc.visualization.spectrum?branchName=Matrix)](https://dev.azure.com/teamkodi/binary-addons/_build/latest?definitionId=33&branchName=Matrix)
 <!--- [![Build Status](https://ci.appveyor.com/api/projects/status/github/xbmc/visualization.spectrum?branch=Matrix&svg=true)](https://ci.appveyor.com/project/xbmc/visualization-spectrum?branch=Matrix) -->
