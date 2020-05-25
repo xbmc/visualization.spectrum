@@ -30,7 +30,7 @@
 //////////////////////////////////////////////////////////////////////
 bool CShader::LoadSource(std::string &file)
 {
-  char buffer[1024];
+  char buffer[1024] = { 0 };
 
   kodi::vfs::CFile source;
   source.OpenFile(file);
