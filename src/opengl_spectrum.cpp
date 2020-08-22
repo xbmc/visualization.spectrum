@@ -136,16 +136,17 @@ bool CVisualizationSpectrum::Start(int channels, int samplesPerSec, int bitsPerS
   {
     for(y = 0; y < 16; y++)
     {
-      m_cHeights[y][x] = 0.0;
+      m_heights[y][x] = 0.0f;
+      m_cHeights[y][x] = 0.0f;
     }
   }
 
-  m_x_speed = 0.0;
-  m_y_speed = 0.5;
-  m_z_speed = 0.0;
-  m_x_angle = 20.0;
-  m_y_angle = 45.0;
-  m_z_angle = 0.0;
+  m_x_speed = 0.0f;
+  m_y_speed = 0.5f;
+  m_z_speed = 0.0f;
+  m_x_angle = 20.0f;
+  m_y_angle = 45.0f;
+  m_z_angle = 0.0f;
 
   m_projMat = glm::frustum(-1.0f, 1.0f, -1.0f, 1.0f, 1.5f, 10.0f);
 
@@ -209,14 +210,14 @@ void CVisualizationSpectrum::Render()
   glClear(GL_DEPTH_BUFFER_BIT);
 
   m_x_angle += m_x_speed;
-  if(m_x_angle >= 360.0)
-    m_x_angle -= 360.0;
+  if(m_x_angle >= 360.0f)
+    m_x_angle -= 360.0f;
 
   if (m_y_fixedAngle < 0.0f)
   {
     m_y_angle += m_y_speed;
-    if(m_y_angle >= 360.0)
-      m_y_angle -= 360.0;
+    if(m_y_angle >= 360.0f)
+      m_y_angle -= 360.0f;
   }
   else
   {
@@ -224,8 +225,8 @@ void CVisualizationSpectrum::Render()
   }
 
   m_z_angle += m_z_speed;
-  if(m_z_angle >= 360.0)
-    m_z_angle -= 360.0;
+  if(m_z_angle >= 360.0f)
+    m_z_angle -= 360.0f;
 
   m_modelMat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, -5.0f));
   m_modelMat = glm::rotate(m_modelMat, glm::radians(m_x_angle), glm::vec3(1.0f, 0.0f, 0.0f));
