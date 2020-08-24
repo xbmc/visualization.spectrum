@@ -234,6 +234,7 @@ bool CVisualizationSpectrum::Start(int iChannels, int iSamplesPerSec, int iBitsP
   {
     for(y = 0; y < 16; y++)
     {
+      heights[y][x] = 0.0f;
       cHeights[y][x] = 0.0f;
     }
   }
