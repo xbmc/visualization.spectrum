@@ -82,17 +82,25 @@ msgid "Point size"
 msgstr "Tamaño del punto"
 
 msgctxt "#30016"
-msgid "%i pixel"
-msgstr "Pixel %i"
+msgid "{0:d} pixel"
+msgstr ""
 
 msgctxt "#30017"
 msgid "Rotation position"
 msgstr "Posición de rotación"
 
 msgctxt "#30018"
-msgid "%i°"
-msgstr "%iº"
+msgid "{0:d}°"
+msgstr ""
 
 msgctxt "#30019"
 msgid "Turn continuously"
 msgstr "Girar continuamente"
+
+#~ msgctxt "#30016"
+#~ msgid "%i pixel"
+#~ msgstr "Pixel %i"
+
+#~ msgctxt "#30018"
+#~ msgid "%i°"
+#~ msgstr "%iº"

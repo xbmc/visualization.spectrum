@@ -81,7 +81,7 @@ msgid "Point size"
 msgstr "Punktgröße"
 
 msgctxt "#30016"
-msgid "%i pixel"
+msgid "{0:d} pixel"
 msgstr ""
 
 msgctxt "#30017"
@@ -89,9 +89,13 @@ msgid "Rotation position"
 msgstr "Drehposition"
 
 msgctxt "#30018"
-msgid "%i°"
-msgstr "%i°"
+msgid "{0:d}°"
+msgstr ""
 
 msgctxt "#30019"
 msgid "Turn continuously"
 msgstr "Durchgehend drehen"
+
+#~ msgctxt "#30018"
+#~ msgid "%i°"
+#~ msgstr "%i°"
