@@ -83,7 +83,7 @@ msgid "Point size"
 msgstr ""
 
 msgctxt "#30016"
-msgid "%i pixel"
+msgid "{0:d} pixel"
 msgstr ""
 
 msgctxt "#30017"
@@ -91,7 +91,7 @@ msgid "Rotation position"
 msgstr ""
 
 msgctxt "#30018"
-msgid "%i°"
+msgid "{0:d}°"
 msgstr ""
 
 msgctxt "#30019"
