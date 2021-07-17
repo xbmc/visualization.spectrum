@@ -16,6 +16,14 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+msgctxt "Addon Summary"
+msgid "Visualisation showing a rotating 3D Spectrum Analyzer"
+msgstr "การแสดงแสงสี ทำให้เห็นการหมุนแบบ 3 มิติ ของการวิเคราะห์คลื่นความถี่เสียง"
+
+msgctxt "Addon Description"
+msgid "Spectrum is a Visualisation showing a rotating 3D Spectrum Analyzer rendered in  that moves to the beat of the music creating a wave effect across the spectrum grid.&#10;It also has settings to adjust the spectrum bar height, Its speed, and how the bars are rendered (solid, points, wire frame) and is a nice light weight, low cpu useage visualisation that looks great"
+msgstr "Spectrum เป็น การแสดงแสงสี ทำให้เห็นการหมุนกราฟวิเคราะห์คลื่นความถี่เสียง แบบ 3 มิติ ที่สร้างขึ้นโดย  ที่ขยับไปตามจังหวะของเพลงที่สร้างผลกระทบเป็นคลื่นไปทั่วตารางความถี่.&#10;นอกจากนี้ยังมีการตั้งค่าเพื่อปรับความสูงของแท่งคลื่นความถี่,ความเร็วและกระบวนการที่แท่งแสดงผล (ของแข็ง, จุด, โครงลวด) ทั้งยังใช้ทรัพยากรน้อยได้ดี, การแสดงแสงสี ที่ใช้ซีพียูต่ำนั่นก็ดูยอดเยี่ยมทีเดียว"
+
 msgctxt "#30000"
 msgid "Mode"
 msgstr "โหมด"
