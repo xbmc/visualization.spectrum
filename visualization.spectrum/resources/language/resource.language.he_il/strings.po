@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC Main\n"
-"Report-Msgid-Bugs-To: translations@kodi.tv\n"
+"Report-Msgid-Bugs-To: http://trac.xbmc.org/\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: 2021-07-16 18:29+0000\n"
 "Last-Translator: Yaron Shahrabani <sh.yaron@gmail.com>\n"
@@ -82,17 +82,25 @@ msgid "Point size"
 msgstr "גודל נקודה"
 
 msgctxt "#30016"
-msgid "%i pixel"
-msgstr "%i פיקסלים"
+msgid "{0:d} pixel"
+msgstr ""
 
 msgctxt "#30017"
 msgid "Rotation position"
 msgstr "מיקום סיבוב"
 
 msgctxt "#30018"
-msgid "%i°"
-msgstr "%i°‎"
+msgid "{0:d}°"
+msgstr ""
 
 msgctxt "#30019"
 msgid "Turn continuously"
 msgstr "להמשיך לפנות"
+
+#~ msgctxt "#30016"
+#~ msgid "%i pixel"
+#~ msgstr "%i פיקסלים"
+
+#~ msgctxt "#30018"
+#~ msgid "%i°"
+#~ msgstr "%i°‎"
