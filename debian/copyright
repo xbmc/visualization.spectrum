@@ -3,7 +3,7 @@ Upstream-Name: visualization.spectrum
 
 Files: *
 Copyright: 1998-2000  Peter Alm, Mikael Alm, Olle Hallnas, Thomas Nilsson and 4Front Technologies 
-           2005-2020 Team Kodi
+           2005-2021 Team Kodi
 License: GPL-2+
  This package is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ License: GPL-2+
 Files: debian/*
 Copyright: 2013 Arne Morten Kvarving <arne.morten.kvarving@sintef.no>
            2013 wsnipex <wsnipex@a1.net>
-           2005-2020 Team Kodi
+           2005-2021 Team Kodi
 License: GPL-2+
  This package is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
