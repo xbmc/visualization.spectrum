@@ -67,7 +67,7 @@ public:
   bool Start(int channels, int samplesPerSec, int bitsPerSample, std::string songName) override;
   void Render() override;
   void AudioData(const float* audioData, int audioDataLength, float *freqData, int freqDataLength) override;
-  ADDON_STATUS SetSetting(const std::string& settingName, const kodi::CSettingValue& settingValue) override;
+  ADDON_STATUS SetSetting(const std::string& settingName, const kodi::addon::CSettingValue& settingValue) override;
 
 private:
   void SetBarHeightSetting(int settingValue);
@@ -118,10 +118,10 @@ CVisualizationSpectrum::CVisualizationSpectrum()
   m_context = (ID3D11DeviceContext*)Device();
   m_context->GetDevice(&m_device);
 
-  SetBarHeightSetting(kodi::GetSettingInt("bar_height"));
-  SetSpeedSetting(kodi::GetSettingInt("speed"));
-  SetModeSetting(kodi::GetSettingInt("mode"));
-  m_y_fixedAngle = kodi::GetSettingInt("rotation_angle");
+  SetBarHeightSetting(kodi::addon::GetSettingInt("bar_height"));
+  SetSpeedSetting(kodi::addon::GetSettingInt("speed"));
+  SetModeSetting(kodi::addon::GetSettingInt("mode"));
+  m_y_fixedAngle = kodi::addon::GetSettingInt("rotation_angle");
 
   if (!init_renderer_objs())
     kodi::Log(ADDON_LOG_ERROR, "Failed to init DirectX");
@@ -365,7 +365,7 @@ void CVisualizationSpectrum::SetModeSetting(int settingValue)
 // Set a specific Setting value (called from XBMC)
 // !!! Add-on master function !!!
 //-----------------------------------------------------------------------------
-ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName, const kodi::CSettingValue& settingValue)
+ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName, const kodi::addon::CSettingValue& settingValue)
 {
   if (settingName.empty() || settingValue.empty())
     return ADDON_STATUS_UNKNOWN;

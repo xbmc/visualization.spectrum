@@ -39,7 +39,7 @@
 
 #define NUM_BANDS 16
 
-class ATTRIBUTE_HIDDEN CVisualizationSpectrum
+class ATTR_DLL_LOCAL CVisualizationSpectrum
   : public kodi::addon::CAddonBase,
     public kodi::addon::CInstanceVisualization,
     public kodi::gui::gl::CShaderProgram
@@ -52,7 +52,7 @@ public:
   void Stop() override;
   void Render() override;
   void AudioData(const float* audioData, int audioDataLength, float* freqData, int freqDataLength) override;
-  ADDON_STATUS SetSetting(const std::string& settingName, const kodi::CSettingValue& settingValue) override;
+  ADDON_STATUS SetSetting(const std::string& settingName, const kodi::addon::CSettingValue& settingValue) override;
 
   void OnCompiledAndLinked() override;
   bool OnEnabled() override;
@@ -106,10 +106,10 @@ CVisualizationSpectrum::CVisualizationSpectrum()
 {
   m_scale = 1.0 / log(256.0);
 
-  SetBarHeightSetting(kodi::GetSettingInt("bar_height"));
-  SetSpeedSetting(kodi::GetSettingInt("speed"));
-  SetModeSetting(kodi::GetSettingInt("mode"));
-  m_y_fixedAngle = kodi::GetSettingInt("rotation_angle");
+  SetBarHeightSetting(kodi::addon::GetSettingInt("bar_height"));
+  SetSpeedSetting(kodi::addon::GetSettingInt("speed"));
+  SetModeSetting(kodi::addon::GetSettingInt("mode"));
+  m_y_fixedAngle = kodi::addon::GetSettingInt("rotation_angle");
 
   m_vertex_buffer_data.resize(48);
   m_color_buffer_data.resize(48);
@@ -122,8 +122,8 @@ bool CVisualizationSpectrum::Start(int channels, int samplesPerSec, int bitsPerS
   (void)bitsPerSample;
   (void)songName;
 
-  std::string fraqShader = kodi::GetAddonPath("resources/shaders/" GL_TYPE_STRING "/frag.glsl");
-  std::string vertShader = kodi::GetAddonPath("resources/shaders/" GL_TYPE_STRING "/vert.glsl");
+  std::string fraqShader = kodi::addon::GetAddonPath("resources/shaders/" GL_TYPE_STRING "/frag.glsl");
+  std::string vertShader = kodi::addon::GetAddonPath("resources/shaders/" GL_TYPE_STRING "/vert.glsl");
   if (!LoadShaderFiles(vertShader, fraqShader) || !CompileAndLink())
   {
     kodi::Log(ADDON_LOG_ERROR, "Failed to create or compile shader");
@@ -548,7 +548,7 @@ void CVisualizationSpectrum::SetModeSetting(int settingValue)
 
     case 2:
       m_mode = GL_POINTS;
-      m_pointSize = kodi::GetSettingInt("pointsize");
+      m_pointSize = kodi::addon::GetSettingInt("pointsize");
       break;
 
     case 0:
@@ -563,7 +563,7 @@ void CVisualizationSpectrum::SetModeSetting(int settingValue)
 // Set a specific Setting value (called from Kodi)
 // !!! Add-on master function !!!
 //-----------------------------------------------------------------------------
-ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName, const kodi::CSettingValue& settingValue)
+ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName, const kodi::addon::CSettingValue& settingValue)
 {
   if (settingName.empty() || settingValue.empty())
     return ADDON_STATUS_UNKNOWN;
