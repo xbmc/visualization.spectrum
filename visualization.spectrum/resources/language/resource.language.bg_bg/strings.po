@@ -21,8 +21,10 @@ msgid "Visualisation showing a rotating 3D Spectrum Analyzer"
 msgstr "Визуализация представяща ротиращ се 3D спектрален анализатор"
 
 msgctxt "Addon Description"
-msgid "Spectrum is a Visualisation showing a rotating 3D Spectrum Analyzer rendered in  that moves to the beat of the music creating a wave effect across the spectrum grid.&#10;It also has settings to adjust the spectrum bar height, Its speed, and how the bars are rendered (solid, points, wire frame) and is a nice light weight, low cpu useage visualisation that looks great"
-msgstr "Spectrum е визуализация изобразяваща ротиращ се 3D спектрален анализатор (рендването се извършва с ). Ротацията е според ритъма на музиката и предизвиква вълнови ефект по спектрална решетка.&#10;Можете да настройвате височината на спектралните стълбове, скоростта и рендването - solid, points, wire frame. Характеризира се с отличен вид, като същевременно почти не натоварва процесора."
+msgid "Spectrum is a Visualisation showing a rotating 3D Spectrum Analyzer rendered in  that moves to the beat of the music creating a wave effect across the spectrum grid.
+It also has settings to adjust the spectrum bar height, Its speed, and how the bars are rendered (solid, points, wire frame) and is a nice light weight, low cpu useage visualisation that looks great"
+msgstr "Spectrum е визуализация изобразяваща ротиращ се 3D спектрален анализатор (рендването се извършва с ). Ротацията е според ритъма на музиката и предизвиква вълнови ефект по спектрална решетка.
+Можете да настройвате височината на спектралните стълбове, скоростта и рендването - solid, points, wire frame. Характеризира се с отличен вид, като същевременно почти не натоварва процесора."
 
 msgctxt "#30000"
 msgid "Mode"
