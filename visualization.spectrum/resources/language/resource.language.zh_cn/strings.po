@@ -22,8 +22,8 @@ msgid "Visualisation showing a rotating 3D Spectrum Analyzer"
 msgstr "显示旋转三维频谱分析图像的可视化效果"
 
 msgctxt "Addon Description"
-msgid "Spectrum is a Visualisation showing a rotating 3D Spectrum Analyzer rendered in  that moves to the beat of the music creating a wave effect across the spectrum grid.&#10;It also has settings to adjust the spectrum bar height, Its speed, and how the bars are rendered (solid, points, wire frame) and is a nice light weight, low cpu useage visualisation that looks great"
-msgstr "光谱是显示旋转3D频谱分析器的可视化图像，在  随着音乐的节拍移动，在整个频谱网格上产生波动效果。&#10;它也有设置来调整光谱条的高度、速度以及条的渲染方式(实线、点、线框)，是一个很好的轻量级、低CPU使用的可视化效果，看起来很棒"
+msgid "Spectrum is a Visualisation showing a rotating 3D Spectrum Analyzer rendered in  that moves to the beat of the music creating a wave effect across the spectrum grid.[CR]It also has settings to adjust the spectrum bar height, Its speed, and how the bars are rendered (solid, points, wire frame) and is a nice light weight, low cpu useage visualisation that looks great"
+msgstr "光谱是显示旋转3D频谱分析器的可视化图像，在  随着音乐的节拍移动，在整个频谱网格上产生波动效果。[CR]它也有设置来调整光谱条的高度、速度以及条的渲染方式(实线、点、线框)，是一个很好的轻量级、低CPU使用的可视化效果，看起来很棒"
 
 msgctxt "#30000"
 msgid "Mode"
