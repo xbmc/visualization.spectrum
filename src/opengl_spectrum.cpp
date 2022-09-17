@@ -1,6 +1,6 @@
 /*
  *  Copyright (C) 1998-2000 Peter Alm, Mikael Alm, Olle Hallnas, Thomas Nilsson and 4Front Technologies
- *  Copyright (C) 2005-2021 Team Kodi (https://kodi.tv)
+ *  Copyright (C) 2005-2022 Team Kodi (https://kodi.tv)
  *
  *  SPDX-License-Identifier: GPL-2.0-or-later
  *  See LICENSE.md for more information.
@@ -48,10 +48,10 @@ public:
   CVisualizationSpectrum();
   ~CVisualizationSpectrum() override = default;
 
-  bool Start(int channels, int samplesPerSec, int bitsPerSample, std::string songName) override;
+  bool Start(int channels, int samplesPerSec, int bitsPerSample, const std::string& songName) override;
   void Stop() override;
   void Render() override;
-  void AudioData(const float* audioData, int audioDataLength, float* freqData, int freqDataLength) override;
+  void AudioData(const float* audioData, size_t audioDataLength) override;
   ADDON_STATUS SetSetting(const std::string& settingName, const kodi::addon::CSettingValue& settingValue) override;
 
   void OnCompiledAndLinked() override;
@@ -115,7 +115,7 @@ CVisualizationSpectrum::CVisualizationSpectrum()
   m_color_buffer_data.resize(48);
 }
 
-bool CVisualizationSpectrum::Start(int channels, int samplesPerSec, int bitsPerSample, std::string songName)
+bool CVisualizationSpectrum::Start(int channels, int samplesPerSec, int bitsPerSample, const std::string& songName)
 {
   (void)channels;
   (void)samplesPerSec;
@@ -446,7 +446,7 @@ void CVisualizationSpectrum::draw_bars(void)
   }
 }
 
-void CVisualizationSpectrum::AudioData(const float* pAudioData, int iAudioDataLength, float *pFreqData, int iFreqDataLength)
+void CVisualizationSpectrum::AudioData(const float* pAudioData, size_t iAudioDataLength)
 {
   int i,c;
   int y=0;
