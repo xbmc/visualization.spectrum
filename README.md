@@ -5,7 +5,6 @@ This is a [Kodi](https://kodi.tv) visualization addon.
 [![License: GPL-2.0-or-later](https://img.shields.io/badge/License-GPL%20v2+-blue.svg)](LICENSE.md)
 [![Build Status](https://dev.azure.com/teamkodi/binary-addons/_apis/build/status/xbmc.visualization.spectrum?branchName=Nexus)](https://dev.azure.com/teamkodi/binary-addons/_build/latest?definitionId=33&branchName=Nexus)
 [![Build Status](https://jenkins.kodi.tv/view/Addons/job/xbmc/job/visualization.spectrum/job/Nexus/badge/icon)](https://jenkins.kodi.tv/blue/organizations/jenkins/xbmc%2Fvisualization.spectrum/branches/)
-<!--- [![Build Status](https://ci.appveyor.com/api/projects/status/github/xbmc/visualization.spectrum?branch=Nexus&svg=true)](https://ci.appveyor.com/project/xbmc/visualization-spectrum?branch=Nexus) -->
 
 ![screenshot](https://raw.githubusercontent.com/xbmc/visualization.spectrum/Nexus/visualization.spectrum/resources/screenshot-01.jpg)
 
