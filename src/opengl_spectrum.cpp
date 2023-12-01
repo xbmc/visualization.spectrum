@@ -42,6 +42,14 @@
 
 #define MIN_FREQS_PER_BAR 2 // use at least two freqs per bar
 
+#define COLOR_HEIGHT_ADJUST 0.75f
+
+enum {
+  COLOR_LEGACY,
+  COLOR_STACKED,
+  COLOR_MONOCHROME,
+};
+
 class ATTR_DLL_LOCAL CVisualizationSpectrum
   : public kodi::addon::CAddonBase,
     public kodi::addon::CInstanceVisualization,
@@ -63,8 +71,6 @@ public:
   bool OnEnabled() override;
 
 private:
-  void AddBar(GLfloat xMid, GLfloat zMid, GLfloat height, GLfloat red, GLfloat green, GLfloat blue);
-  void AddQuad(glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 d, glm::vec3 color);
   void RenderBufferData();
 
   std::mutex m_mutex;
@@ -78,9 +84,11 @@ private:
   std::vector<GLfloat> m_cHeights;
 
   bool m_glInitialized = false;
+  bool m_hScaleIsFlat = false;
   bool m_shadersLoaded = false;
 
   int m_channels = 0;
+  int m_colorMode = COLOR_STACKED;
   int m_dbRange = 48;
 
   size_t m_freqDataLength = 0;
@@ -111,6 +119,9 @@ private:
   GLenum m_drawMode = GL_TRIANGLES;
 
   // Shader related data
+
+  glm::vec3 m_topColor = {1.0f, 1.0f, 1.0f};
+  glm::vec3 m_bottomColor = {0.05f, 0.05f, 0.05f};
 
   glm::mat4 m_projMat;
   glm::mat4 m_modelMat;
@@ -217,9 +228,13 @@ void CVisualizationSpectrum::Render()
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
 
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
-  glFrontFace(GL_CCW);
+  // Note: For flat bar mode, all surfaces need to be visible always
+  if (!m_hScaleIsFlat)
+  {
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+  }
 
   // Clear the screen
   glClear(GL_DEPTH_BUFFER_BIT);
@@ -259,7 +274,8 @@ void CVisualizationSpectrum::Render()
   glDisableVertexAttribArray(m_hPos);
   glDisableVertexAttribArray(m_hCol);
 
-  glDisable(GL_CULL_FACE);
+  if (!m_hScaleIsFlat)
+    glDisable(GL_CULL_FACE);
 
   glDisable(GL_DEPTH_TEST);
 #ifdef HAS_GL
@@ -292,64 +308,6 @@ bool CVisualizationSpectrum::OnEnabled()
   return true;
 }
 
-void CVisualizationSpectrum::AddQuad(glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 d, glm::vec3 color)
-{
-  m_vertexBufferData.insert(m_vertexBufferData.end(),
-  {
-    a, b, // line-mode: 1st line
-    c, c,
-    d, a, // line-mode: 2nd line
-  });
-  m_colorBufferData.insert(m_colorBufferData.end(), 6, color);
-}
-
-void CVisualizationSpectrum::AddBar(GLfloat xMid, GLfloat zMid, GLfloat height, GLfloat red, GLfloat green, GLfloat blue)
-{
-  GLfloat wHalf = m_fieldScale / (m_numBands - 1.0f) * 0.5f * 0.5f;
-
-  GLfloat lft = xMid - wHalf;
-  GLfloat rgt = xMid + wHalf;
-
-  GLfloat bck = zMid - wHalf;
-  GLfloat fnt = zMid + wHalf;
-
-  GLfloat top = height;
-  GLfloat btm = 0.0f;
-
-  glm::vec3 color = {red, green, blue};
-
-  GLfloat sideMlpy1 = 1.0f;
-  GLfloat sideMlpy2 = 1.0f;
-  GLfloat sideMlpy3 = 1.0f;
-  GLfloat sideMlpy4 = 1.0f;
-
-  if (m_drawMode == GL_TRIANGLES)
-  {
-    sideMlpy1 = 0.5f;
-    sideMlpy2 = 0.25f;
-    sideMlpy3 = 0.75f;
-    sideMlpy4 = 0.5f;
-  }
-
-  // notes:
-  // Vertices must be in counter-clock-wise order for face-culling.
-  // For lines-mode, only 1st <-> 2nd and 1st <-> last vertex are used.
-  // Therefore the 1st vertices are choosen so that all 12 edges are drawn.
-
-  // Bottom
-  AddQuad({rgt, btm, fnt}, {lft, btm, fnt}, {lft, btm, bck}, {rgt, btm, bck}, color);
-  // Left side
-  AddQuad({lft, btm, fnt}, {lft, top, fnt}, {lft, top, bck}, {lft, btm, bck}, color * sideMlpy1);
-  // Back
-  AddQuad({lft, btm, bck}, {lft, top, bck}, {rgt, top, bck}, {rgt, btm, bck}, color * sideMlpy2);
-  // Front
-  AddQuad({rgt, top, fnt}, {lft, top, fnt}, {lft, btm, fnt}, {rgt, btm, fnt}, color * sideMlpy3);
-  // Right side
-  AddQuad({rgt, top, bck}, {rgt, top, fnt}, {rgt, btm, fnt}, {rgt, btm, bck}, color * sideMlpy4);
-  // Top
-  AddQuad({lft, top, bck}, {lft, top, fnt}, {rgt, top, fnt}, {rgt, top, bck}, color);
-}
-
 void CVisualizationSpectrum::RenderBufferData()
 {
   m_colorBufferData.clear();
@@ -366,39 +324,216 @@ void CVisualizationSpectrum::RenderBufferData()
     return;
 
   // Pre-allocate gl buffer memory
-  size_t glBufferDataCapacity = m_numBands * m_numBands * 6 * 2 * 3; // 6 quads
+  size_t glBufferDataCapacity = m_numBands * m_numBands;
+  size_t stackHeight = m_colorMode == COLOR_STACKED ? 2 : 1;
+  if (m_drawMode != GL_POINTS)
+  {
+    if (m_hScaleIsFlat)
+      glBufferDataCapacity *= 1 * 2 * 3; // one quad only
+    else if (m_drawMode == GL_TRIANGLES)
+      glBufferDataCapacity *= (2 + stackHeight * 4) * 2 * 3; // 6 or 10 quads ...
+    else if (m_drawMode == GL_LINES)
+      glBufferDataCapacity *= (2 * 4 + stackHeight * 4) * 2; // ... or 2 lines-quads + 4 or 8 side lines
+  }
   if (m_colorBufferData.capacity() < glBufferDataCapacity)
     m_colorBufferData.reserve(glBufferDataCapacity);
   if (m_vertexBufferData.capacity() < glBufferDataCapacity)
     m_vertexBufferData.reserve(glBufferDataCapacity);
 
+  GLfloat halfBarWidth = m_fieldScale / (m_numBands - 1.0f) * 0.5f * 0.5f;
+
+  GLfloat halfTopColorHeight = m_hScale * COLOR_HEIGHT_ADJUST * 0.5f;
+
+  GLfloat lft = 0.0f;
+  GLfloat rgt = 0.0f;
+  GLfloat bck = 0.0f;
+  GLfloat fnt = 0.0f;
+
+  auto addLinesQuad = [&](GLfloat y, glm::vec3 color)
+  {
+    m_vertexBufferData.insert(m_vertexBufferData.end(),
+    {
+      {lft, y, fnt}, {rgt, y, fnt}, // front
+      {lft, y, bck}, {rgt, y, bck}, // back
+      {lft, y, fnt}, {lft, y, bck}, // left
+      {rgt, y, fnt}, {rgt, y, bck}, // right
+    });
+    m_colorBufferData.insert(m_colorBufferData.end(), 8, color);
+  };
+
+  // Note: Triangle vertices must be in counter-clock-wise order for face-culling.
+
+  auto addTop = [&](GLfloat top, glm::vec3 cTop)
+  {
+    if (m_drawMode == GL_TRIANGLES)
+    {
+      m_vertexBufferData.insert(m_vertexBufferData.end(),
+      {
+        {lft, top, bck}, {lft, top, fnt}, {rgt, top, fnt}, {rgt, top, fnt}, {rgt, top, bck}, {lft, top, bck}, // top
+      });
+      m_colorBufferData.insert(m_colorBufferData.end(), 6, cTop);
+      return;
+    }
+    if (m_drawMode == GL_LINES)
+    {
+      addLinesQuad(top, cTop);
+      return;
+    }
+    // m_drawMode == GL_POINTS
+    m_vertexBufferData.push_back({(lft + rgt) * 0.5f, top, (fnt + bck) * 0.5f}); // top mid
+    m_colorBufferData.push_back(cTop);
+  };
+
+  auto addBottom = [&](glm::vec3 cBtm)
+  {
+    if (m_drawMode == GL_TRIANGLES)
+    {
+      m_vertexBufferData.insert(m_vertexBufferData.end(),
+      {
+        {rgt, 0.0f, fnt}, {lft, 0.0f, fnt}, {lft, 0.0f, bck}, {lft, 0.0f, bck}, {rgt, 0.0f, bck}, {rgt, 0.0f, fnt}, // bottom
+      });
+      m_colorBufferData.insert(m_colorBufferData.end(), 6, cBtm);
+      return;
+    }
+    if (m_drawMode == GL_LINES)
+      addLinesQuad(0.0f, cBtm);
+  };
+
+  auto addSides = [&](GLfloat btm, glm::vec3 cBtm, GLfloat top, glm::vec3 cTop)
+  {
+    if (m_drawMode == GL_TRIANGLES)
+    {
+      m_vertexBufferData.insert(m_vertexBufferData.end(),
+      {
+        {rgt, top, fnt}, {lft, top, fnt}, {lft, btm, fnt}, {lft, btm, fnt}, {rgt, btm, fnt}, {rgt, top, fnt}, // front
+        {lft, btm, bck}, {lft, top, bck}, {rgt, top, bck}, {rgt, top, bck}, {rgt, btm, bck}, {lft, btm, bck}, // back
+        {lft, btm, fnt}, {lft, top, fnt}, {lft, top, bck}, {lft, top, bck}, {lft, btm, bck}, {lft, btm, fnt}, // left
+        {rgt, top, bck}, {rgt, top, fnt}, {rgt, btm, fnt}, {rgt, btm, fnt}, {rgt, btm, bck}, {rgt, top, bck}, // right
+      });
+
+      glm::vec3 cTopFnt = cTop * 0.75f;
+      glm::vec3 cBtmFnt = cBtm * 0.75f;
+      glm::vec3 cTopBck = cTop * 0.25f;
+      glm::vec3 cBtmBck = cBtm * 0.25f;
+      glm::vec3 cTopSde = cTop * 0.50f;
+      glm::vec3 cBtmSde = cBtm * 0.50f;
+
+      m_colorBufferData.insert(m_colorBufferData.end(),
+      {
+        cTopFnt, cTopFnt, cBtmFnt, cBtmFnt, cBtmFnt, cTopFnt, // front
+        cBtmBck, cTopBck, cTopBck, cTopBck, cBtmBck, cBtmBck, // back
+        cBtmSde, cTopSde, cTopSde, cTopSde, cBtmSde, cBtmSde, // left
+        cTopSde, cTopSde, cBtmSde, cBtmSde, cBtmSde, cTopSde, // right
+      });
+      return;
+    }
+    if (m_drawMode == GL_LINES)
+    {
+      m_vertexBufferData.insert(m_vertexBufferData.end(),
+      {
+        {lft, btm, fnt}, {lft, top, fnt}, // front left
+        {rgt, btm, fnt}, {rgt, top, fnt}, // front right
+        {lft, btm, bck}, {lft, top, bck}, // back left
+        {rgt, btm, bck}, {rgt, top, bck}, // back right
+      });
+      m_colorBufferData.insert(m_colorBufferData.end(), {cBtm, cTop, cBtm, cTop, cBtm, cTop, cBtm, cTop,}); // four lines
+    }
+  };
+
   for (size_t y = 0; y <= yMax; y++)
   {
     GLfloat zMid = m_fieldScale * (0.5f - y / (float)yMax);
 
-    GLfloat blue = y / (float)yMax;
+    bck = zMid - halfBarWidth;
+    fnt = zMid + halfBarWidth;
 
     for (size_t x = 0; x <= xMax; x++)
     {
       GLfloat xMid = m_fieldScale * (-0.5f + x / (float)xMax);
 
-      GLfloat green = x / (float)xMax;
-
-      GLfloat red = (1.0f - blue) * (1.0f - green);
+      lft = xMid - halfBarWidth;
+      rgt = xMid + halfBarWidth;
 
       size_t i = (m_heightsRingBufBegin + m_numBands * y + x) % m_heights.size();
 
-      if (m_hSpeed > 0.0f && std::fabs(m_cHeights[i] - m_heights[i]) > m_hSpeed)
+      GLfloat height = m_cHeights[i];
+      GLfloat heightTarget = m_heights[i];
+
+      // Animate height change
+      if (m_hSpeed > 0.0f && std::fabs(height - heightTarget) > m_hSpeed)
       {
-        if (m_cHeights[i] < m_heights[i])
-          m_cHeights[i] += m_hSpeed;
+        if (height < heightTarget)
+          height += m_hSpeed;
         else
-          m_cHeights[i] -= m_hSpeed;
+          height -= m_hSpeed;
       }
       else
-        m_cHeights[i] = m_heights[i];
+        height = heightTarget;
 
-      AddBar(xMid, zMid, m_cHeights[i], red, green, blue);
+      m_cHeights[i] = height;
+
+      GLfloat colorRate = height / halfTopColorHeight;
+
+      if (m_colorMode != COLOR_STACKED)
+      {
+        colorRate *= 0.5f; // full height bar
+      }
+      else if (height > halfTopColorHeight) // stack two bars
+      {
+        colorRate -= 1.0f;
+
+        glm::vec3 topColor2 = {0.8f, 0.0f, 0.0f}; // darker red
+        topColor2 = m_topColor + (topColor2 - m_topColor) * colorRate;
+
+        if (m_hScaleIsFlat)
+        {
+          addTop(0.0f, topColor2); // note: face-culling is disabled
+          continue;
+        }
+
+        addTop(height, topColor2);
+        addSides(halfTopColorHeight, m_topColor, height, topColor2);
+        addSides(0.0f, m_bottomColor, halfTopColorHeight, m_topColor);
+        addBottom(m_bottomColor);
+        continue;
+      }
+
+      if (m_colorMode != COLOR_LEGACY)
+      {
+        glm::vec3 topColor = m_bottomColor + (m_topColor - m_bottomColor) * colorRate;
+
+        if (m_hScaleIsFlat)
+        {
+          addTop(0.0f, topColor); // note: face-culling is disabled
+          continue;
+        }
+
+        addTop(height, topColor);
+        addSides(0.0f, m_bottomColor, height, topColor);
+        addBottom(m_bottomColor);
+        continue;
+      }
+
+      // Legacy mode
+      GLfloat green = x / (float)xMax;
+      GLfloat blue = y / (float)yMax;
+      GLfloat red = (1.0f - blue) * (1.0f - green);
+
+      glm::vec3 topColor = {red, green, blue};
+      glm::vec3 bottomColor = topColor;
+
+      if (m_hScaleIsFlat)
+      {
+        bottomColor *= 0.05f;
+        topColor = bottomColor + (topColor - bottomColor) * colorRate;
+
+        addTop(0.0f, topColor); // note: face-culling is disabled
+        continue;
+      }
+
+      addTop(height, topColor);
+      addSides(0.0f, bottomColor, height, topColor);
+      addBottom(bottomColor);
     }
   }
 }
@@ -542,6 +677,7 @@ ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName, 
   if (settingName == "bar_height")
   {
     m_hScale = 0.56f; // try to match avarage heights on former squeezed 1:1-frustum at least on 16:9 displays
+    m_hScaleIsFlat = false;
 
     switch (value)
     {
@@ -568,10 +704,50 @@ ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName, 
       }
       case 4:
       {
-        m_hScale *= 0.33f; // unused
+        m_hScale *= 0.125f; // very small (used for heights animation)
+        m_hScaleIsFlat = true; // flat
         break;
       }
     }
+  }
+  else if (settingName == "color_mode")
+  {
+    m_colorMode = COLOR_MONOCHROME;
+
+    switch (value)
+    {
+      case 0: // legacy mode
+      {
+        m_colorMode = COLOR_LEGACY;
+        break;
+      }
+      case 1: // stack green->red bar on top of blue->green base bar
+      default:
+      {
+        m_colorMode = COLOR_STACKED;
+
+        m_topColor = {0.0f, 0.8f, 0.0f}; // darker green
+        m_bottomColor = {0.0f, 0.0f, 1.0f}; // blue
+        break;
+      }
+      case 2:
+      {
+        m_topColor = {1.0f, 0.8f, 0.0f}; // amber
+        break;
+      }
+      case 3:
+      {
+        m_topColor = {0.0f, 0.0f, 1.0f}; // blue
+        break;
+      }
+      case 4:
+      {
+        m_topColor = {0.0f, 1.0f, 0.0f}; // green
+        break;
+      }
+    }
+    if (m_colorMode == COLOR_MONOCHROME)
+      m_bottomColor = m_topColor * 0.05f;
   }
   else if (settingName == "db_range")
   {

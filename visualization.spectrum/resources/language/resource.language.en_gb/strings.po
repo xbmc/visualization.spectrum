@@ -141,3 +141,31 @@ msgstr ""
 msgctxt "#30028"
 msgid "{0:d}"
 msgstr ""
+
+msgctxt "#30029"
+msgid "Colour mode"
+msgstr ""
+
+msgctxt "#30030"
+msgid "Legacy"
+msgstr ""
+
+msgctxt "#30031"
+msgid "Default"
+msgstr ""
+
+msgctxt "#30032"
+msgid "Flat"
+msgstr ""
+
+msgctxt "#30033"
+msgid "Amber"
+msgstr ""
+
+msgctxt "#30034"
+msgid "Blue"
+msgstr ""
+
+msgctxt "#30035"
+msgid "Green"
+msgstr ""
