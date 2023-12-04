@@ -29,6 +29,7 @@
 #include <math.h>
 #include <stdint.h>
 #include <cstddef>
+#include <chrono>
 #include <mutex>
 
 #include <glm/glm.hpp>
@@ -43,6 +44,9 @@
 #define MIN_FREQS_PER_BAR 2 // use at least two freqs per bar
 
 #define COLOR_HEIGHT_ADJUST 0.75f
+
+#define NUM_BUFFER_ROWS 3 // assumed worst case: got three calls of AudioData, but non of Render
+#define RENDER_DURATIONS_SIZE 30 // half of a second if @ 60 fps
 
 enum {
   COLOR_LEGACY,
@@ -82,14 +86,17 @@ private:
   std::vector<GLfloat> m_hScales;
   std::vector<GLfloat> m_heights;
   std::vector<GLfloat> m_cHeights;
+  std::vector<GLfloat> m_renderDurations;
 
   bool m_glInitialized = false;
   bool m_hScaleIsFlat = false;
   bool m_shadersLoaded = false;
+  bool m_smoothAnim = false;
 
   int m_channels = 0;
   int m_colorMode = COLOR_STACKED;
   int m_dbRange = 48;
+  int m_samplesPerSec = 0;
 
   size_t m_freqDataLength = 0;
   size_t m_prevFreqDataLength = 0;
@@ -106,6 +113,10 @@ private:
   GLfloat m_hSpeed = 0.05f;
 
   GLfloat m_pointSize = 0.0f;
+
+  GLfloat m_lastRenderTimestamp = 0.0f;
+  GLfloat m_renderDuration = 0.0f;
+
   GLfloat m_wScale = 0.5f;
 
   GLfloat m_xAngle = 10.0f; // around 11° on 16:9 looks similar to the former 20° on squeezed 1:1
@@ -114,6 +125,7 @@ private:
 
   GLfloat m_yFixedAngle = -15.0f;
   GLfloat m_yOffset = -0.25f;
+  GLfloat m_yRenderOffset = 0.0f;
 
   GLfloat m_ySpeed = 0.5f;
 
@@ -149,10 +161,16 @@ bool CVisualizationSpectrum::Start(int channels, int samplesPerSec, int bitsPerS
 {
   std::unique_lock<std::mutex> lock(m_mutex);
 
+  kodi::Log(ADDON_LOG_DEBUG,
+    "%s: m_yRenderOffset: %f - channels, samplesPerSec, bitsPerSample: %d %d %d",
+    __func__, m_yRenderOffset, channels, samplesPerSec, bitsPerSample);
+
   m_channels = channels;
-  (void)samplesPerSec;
+  m_samplesPerSec = samplesPerSec;
   (void)bitsPerSample;
   (void)songName;
+
+  m_samples = 0;
 
   if (!m_shadersLoaded)
   {
@@ -179,6 +197,12 @@ void CVisualizationSpectrum::Stop()
 {
   std::unique_lock<std::mutex> lock(m_mutex);
 
+  kodi::Log(ADDON_LOG_DEBUG, "%s", __func__);
+
+  m_channels = 0;
+  m_samplesPerSec = 0;
+  m_samples = 0;
+
   if (!m_glInitialized)
     return;
 
@@ -201,6 +225,47 @@ void CVisualizationSpectrum::Render()
 
   if (!m_glInitialized)
     return;
+
+  // Update m_renderDuration - Note: Also used with m_hSpeed
+  {
+    using namespace std::chrono;
+
+    // Get monotonic time duration since last render (in seconds)
+    GLfloat renderTimestamp = duration<GLfloat>(steady_clock::now().time_since_epoch()).count();
+    GLfloat renderDuration = m_lastRenderTimestamp > 0.0 ? renderTimestamp - m_lastRenderTimestamp : 0.0;
+    m_lastRenderTimestamp = renderTimestamp;
+
+    if (renderDuration > 0.0)
+    {
+      m_renderDuration *= m_renderDurations.size();
+      m_renderDuration += renderDuration;
+      m_renderDurations.push_back(renderDuration);
+      while (m_renderDurations.size() > RENDER_DURATIONS_SIZE)
+      {
+        m_renderDuration -= m_renderDurations[0];
+        m_renderDurations.erase(m_renderDurations.begin());
+      }
+      m_renderDuration /= m_renderDurations.size();
+    }
+  }
+
+  if (m_smoothAnim)
+  {
+    GLfloat audioDuration = 0.0;
+    if (m_samples > 0 && m_samplesPerSec > 0)
+    {
+      audioDuration = 1.0 * m_samples / m_samplesPerSec;
+      m_yRenderOffset -= m_renderDuration / audioDuration;
+    }
+    if (m_yRenderOffset < 0.0) // playback paused (or buffer underrun)
+      m_yRenderOffset = 0.0;
+
+    kodi::Log(ADDON_LOG_DEBUG,
+      "%s: m_yRenderOffset: %f - m_renderDuration, audioDuration, m_samples/m_samplesPerSec: %f %f %d/%d",
+      __func__, m_yRenderOffset, m_renderDuration, audioDuration, m_samples, m_samplesPerSec);
+  }
+  else
+    m_yRenderOffset = 0.0;
 
   RenderBufferData();
 
@@ -318,14 +383,14 @@ void CVisualizationSpectrum::RenderBufferData()
     return;
 
   size_t xMax = m_numBands - 1;
-  size_t yMax = m_numBands - 1;
+  size_t yMax = m_numBands - 1 + NUM_BUFFER_ROWS;
   size_t iMax = m_numBands * yMax + xMax;
 
   if (iMax != m_cHeights.size() - 1 || iMax != m_heights.size() - 1)
     return;
 
   // Pre-allocate gl buffer memory
-  size_t glBufferDataCapacity = m_numBands * m_numBands;
+  size_t glBufferDataCapacity = m_numBands * (m_numBands + 1); // one more row for avoid jitter
   size_t stackHeight = m_colorMode == COLOR_STACKED ? 2 : 1;
   if (m_drawMode != GL_POINTS)
   {
@@ -441,9 +506,30 @@ void CVisualizationSpectrum::RenderBufferData()
     }
   };
 
-  for (size_t y = 0; y <= yMax; y++)
+  GLfloat xRenderMax = m_numBands - 1.0f;
+  GLfloat yRenderMax = m_numBands - 1.0f;
+  GLfloat yRenderMin = 0.0f;
+
+  bool stopRender = false;
+
+  for (size_t y = 0; y <= yMax && !stopRender; y++)
   {
-    GLfloat zMid = m_fieldScale * (0.5f - (y + 0.5f) / m_numBands);
+    GLfloat yRender = y - m_yRenderOffset;
+
+    // avoid jitter effect
+    if (yRender < yRenderMin)
+      if (y == 0)
+        yRender = yRenderMin;
+      else
+        continue;
+    else
+      if (yRender >= yRenderMax)
+      {
+        yRender = yRenderMax;
+        stopRender = true;
+      }
+
+    GLfloat zMid = m_fieldScale * (0.5f - (yRender + 0.5f) / m_numBands);
 
     bck = zMid - halfBarWidth;
     fnt = zMid + halfBarWidth;
@@ -459,14 +545,17 @@ void CVisualizationSpectrum::RenderBufferData()
 
       GLfloat height = m_cHeights[i];
       GLfloat heightTarget = m_heights[i];
+      GLfloat heigthStep = m_hSpeed;
+      if (m_renderDuration > 0.0f)
+        heigthStep *= m_renderDuration * 60.0f; // take fps into account if other than 60
 
       // Animate height change
-      if (m_hSpeed > 0.0f && std::fabs(height - heightTarget) > m_hSpeed)
+      if (heigthStep > 0.0f && heigthStep < std::fabs(height - heightTarget))
       {
         if (height < heightTarget)
-          height += m_hSpeed;
+          height += heigthStep;
         else
-          height -= m_hSpeed;
+          height -= heigthStep;
       }
       else
         height = heightTarget;
@@ -516,8 +605,8 @@ void CVisualizationSpectrum::RenderBufferData()
       }
 
       // Legacy mode
-      GLfloat green = x / (float)xMax;
-      GLfloat blue = y / (float)yMax;
+      GLfloat green = x / xRenderMax;
+      GLfloat blue = yRender / yRenderMax;
       GLfloat red = (1.0f - blue) * (1.0f - green);
 
       glm::vec3 topColor = {red, green, blue};
@@ -544,7 +633,7 @@ void CVisualizationSpectrum::AudioData(const float* pAudioData, size_t iAudioDat
   std::unique_lock<std::mutex> lock(m_mutex);
 
   // Update bar heights arrays
-  size_t heightsSize = m_numBands * m_numBands;
+  size_t heightsSize = m_numBands * (m_numBands + NUM_BUFFER_ROWS);
   if (m_heights.size() != heightsSize || m_cHeights.size() != heightsSize)
   {
     m_heights.clear();
@@ -658,6 +747,22 @@ void CVisualizationSpectrum::AudioData(const float* pAudioData, size_t iAudioDat
     m_heights[i] = height * m_hScale;
 
     prevXScale = xScale;
+  }
+
+  if (m_smoothAnim)
+  {
+    GLfloat yRenderOffsetMax = NUM_BUFFER_ROWS;
+    bool overrun = false;
+
+    m_yRenderOffset += 1.0;
+
+    if (m_yRenderOffset > yRenderOffsetMax)
+    {
+      m_yRenderOffset = yRenderOffsetMax;
+      overrun = true;
+    }
+
+    kodi::Log(ADDON_LOG_DEBUG, "%s: m_yRenderOffset: %f%s", __func__, m_yRenderOffset, overrun ? " overrun" : "");
   }
 }
 
@@ -813,6 +918,10 @@ ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName, 
   else if (settingName == "rotation_x")
   {
     m_xAngle = value;
+  }
+  else if (settingName == "smooth_anim")
+  {
+    m_smoothAnim = value;
   }
   else if (settingName == "speed")
   {

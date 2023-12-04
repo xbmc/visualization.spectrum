@@ -129,6 +129,19 @@
           </dependencies>
         </setting>
 
+        <setting id="smooth_anim" type="boolean" label="30037">
+          <default>true</default>
+          <control type="toggle"/>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
         <setting id="rotation_angle" type="integer" label="30017">
           <default>-15</default>
           <constraints>
