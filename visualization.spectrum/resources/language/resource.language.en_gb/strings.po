@@ -133,3 +133,11 @@ msgstr ""
 msgctxt "#30026"
 msgid "Rotation speed"
 msgstr ""
+
+msgctxt "#30027"
+msgid "Bands"
+msgstr ""
+
+msgctxt "#30028"
+msgid "{0:d}"
+msgstr ""

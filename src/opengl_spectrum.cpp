@@ -29,6 +29,7 @@
 #include <math.h>
 #include <stdint.h>
 #include <cstddef>
+#include <mutex>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -38,8 +39,6 @@
 #ifndef M_PI
 #define M_PI 3.141592654f
 #endif
-
-#define NUM_BANDS 16
 
 #define MIN_FREQS_PER_BAR 2 // use at least two freqs per bar
 
@@ -68,8 +67,15 @@ private:
   void AddQuad(glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 d, glm::vec3 color);
   void RenderBufferData();
 
+  std::mutex m_mutex;
+
   std::unique_ptr<KFFTR> m_transform;
   std::unique_ptr<float[]> m_freqData;
+
+  std::vector<size_t> m_xScales;
+  std::vector<GLfloat> m_hScales;
+  std::vector<GLfloat> m_heights;
+  std::vector<GLfloat> m_cHeights;
 
   bool m_glInitialized = false;
   bool m_shadersLoaded = false;
@@ -80,13 +86,11 @@ private:
   size_t m_freqDataLength = 0;
   size_t m_prevFreqDataLength = 0;
 
+  size_t m_heightsRingBufBegin = 0;
+
+  size_t m_numBands = 0;
+
   size_t m_samples = 0;
-
-  size_t m_xScales[NUM_BANDS];
-
-  GLfloat m_hScales[NUM_BANDS];
-  GLfloat m_heights[NUM_BANDS][NUM_BANDS];
-  GLfloat m_cHeights[NUM_BANDS][NUM_BANDS];
 
   GLfloat m_fieldScale = 3.0f;
 
@@ -127,15 +131,12 @@ private:
 
 CVisualizationSpectrum::CVisualizationSpectrum()
 {
-  for (int x = 0; x < NUM_BANDS; x++)
-  {
-    m_xScales[x] = 0;
-    m_hScales[x] = 0.0;
-  }
 }
 
 bool CVisualizationSpectrum::Start(int channels, int samplesPerSec, int bitsPerSample, const std::string& songName)
 {
+  std::unique_lock<std::mutex> lock(m_mutex);
+
   m_channels = channels;
   (void)samplesPerSec;
   (void)bitsPerSample;
@@ -153,15 +154,6 @@ bool CVisualizationSpectrum::Start(int channels, int samplesPerSec, int bitsPerS
     m_shadersLoaded = true;
   }
 
-  for (int x = 0; x < NUM_BANDS; x++)
-  {
-    for (int y = 0; y < NUM_BANDS; y++)
-    {
-      m_heights[y][x] = 0.0f;
-      m_cHeights[y][x] = 0.0f;
-    }
-  }
-
 #ifdef HAS_GL
   glGenBuffers(2, m_vertexVBO);
 #endif
@@ -173,6 +165,8 @@ bool CVisualizationSpectrum::Start(int channels, int samplesPerSec, int bitsPerS
 
 void CVisualizationSpectrum::Stop()
 {
+  std::unique_lock<std::mutex> lock(m_mutex);
+
   if (!m_glInitialized)
     return;
 
@@ -191,6 +185,8 @@ void CVisualizationSpectrum::Stop()
 //-----------------------------------------------------------------------------
 void CVisualizationSpectrum::Render()
 {
+  std::unique_lock<std::mutex> lock(m_mutex);
+
   if (!m_glInitialized)
     return;
 
@@ -309,7 +305,7 @@ void CVisualizationSpectrum::AddQuad(glm::vec3 a, glm::vec3 b, glm::vec3 c, glm:
 
 void CVisualizationSpectrum::AddBar(GLfloat xMid, GLfloat zMid, GLfloat height, GLfloat red, GLfloat green, GLfloat blue)
 {
-  GLfloat wHalf = m_fieldScale / (NUM_BANDS - 1.0f) * 0.5f * 0.5f;
+  GLfloat wHalf = m_fieldScale / (m_numBands - 1.0f) * 0.5f * 0.5f;
 
   GLfloat lft = xMid - wHalf;
   GLfloat rgt = xMid + wHalf;
@@ -359,44 +355,72 @@ void CVisualizationSpectrum::RenderBufferData()
   m_colorBufferData.clear();
   m_vertexBufferData.clear();
 
+  if (m_numBands < 2) // lone bar not supported
+    return;
+
+  size_t xMax = m_numBands - 1;
+  size_t yMax = m_numBands - 1;
+  size_t iMax = m_numBands * yMax + xMax;
+
+  if (iMax != m_cHeights.size() - 1 || iMax != m_heights.size() - 1)
+    return;
+
   // Pre-allocate gl buffer memory
-  size_t glBufferDataCapacity = NUM_BANDS * NUM_BANDS * 6 * 2 * 3; // 6 quads
+  size_t glBufferDataCapacity = m_numBands * m_numBands * 6 * 2 * 3; // 6 quads
   if (m_colorBufferData.capacity() < glBufferDataCapacity)
     m_colorBufferData.reserve(glBufferDataCapacity);
   if (m_vertexBufferData.capacity() < glBufferDataCapacity)
     m_vertexBufferData.reserve(glBufferDataCapacity);
 
-  for (size_t y = 0; y < NUM_BANDS; y++)
+  for (size_t y = 0; y <= yMax; y++)
   {
-    GLfloat zMid = m_fieldScale * (0.5f - y / (NUM_BANDS - 1.0f));
+    GLfloat zMid = m_fieldScale * (0.5f - y / (float)yMax);
 
-    GLfloat blue = y / (NUM_BANDS - 1.0f);
+    GLfloat blue = y / (float)yMax;
 
-    for (size_t x = 0; x < NUM_BANDS; x++)
+    for (size_t x = 0; x <= xMax; x++)
     {
-      GLfloat xMid = m_fieldScale * (-0.5f + x / (NUM_BANDS - 1.0f));
+      GLfloat xMid = m_fieldScale * (-0.5f + x / (float)xMax);
 
-      GLfloat green = x / (NUM_BANDS - 1.0f);
+      GLfloat green = x / (float)xMax;
 
       GLfloat red = (1.0f - blue) * (1.0f - green);
 
-      if (m_hSpeed > 0.0f && std::fabs(m_cHeights[y][x] - m_heights[y][x]) > m_hSpeed)
+      size_t i = (m_heightsRingBufBegin + m_numBands * y + x) % m_heights.size();
+
+      if (m_hSpeed > 0.0f && std::fabs(m_cHeights[i] - m_heights[i]) > m_hSpeed)
       {
-        if (m_cHeights[y][x] < m_heights[y][x])
-          m_cHeights[y][x] += m_hSpeed;
+        if (m_cHeights[i] < m_heights[i])
+          m_cHeights[i] += m_hSpeed;
         else
-          m_cHeights[y][x] -= m_hSpeed;
+          m_cHeights[i] -= m_hSpeed;
       }
       else
-        m_cHeights[y][x] = m_heights[y][x];
+        m_cHeights[i] = m_heights[i];
 
-      AddBar(xMid, zMid, m_cHeights[y][x], red, green, blue);
+      AddBar(xMid, zMid, m_cHeights[i], red, green, blue);
     }
   }
 }
 
 void CVisualizationSpectrum::AudioData(const float* pAudioData, size_t iAudioDataLength)
 {
+  std::unique_lock<std::mutex> lock(m_mutex);
+
+  // Update bar heights arrays
+  size_t heightsSize = m_numBands * m_numBands;
+  if (m_heights.size() != heightsSize || m_cHeights.size() != heightsSize)
+  {
+    m_heights.clear();
+    m_cHeights.clear();
+
+    m_heights.resize(heightsSize);
+    m_cHeights.resize(heightsSize);
+  }
+
+  if (m_numBands < 2) // lone bar not supported
+    return;
+
   m_samples = 0;
 
   if (m_channels < 1)
@@ -410,18 +434,21 @@ void CVisualizationSpectrum::AudioData(const float* pAudioData, size_t iAudioDat
     return;
 
   // Update scale arrays
-  if (m_prevFreqDataLength != freqDataLength)
+  if (m_prevFreqDataLength != freqDataLength || m_hScales.size() != m_numBands || m_xScales.size() != m_numBands)
   {
+    m_hScales.clear();
+    m_xScales.clear();
+
     size_t slope = MIN_FREQS_PER_BAR;
-    size_t slopeAmount = slope * NUM_BANDS;
+    size_t slopeAmount = slope * m_numBands;
 
     size_t prevXScale = 0;
-    for (size_t x = 0; x < NUM_BANDS; x++)
+    for (size_t x = 0; x < m_numBands; x++)
     {
       size_t xScale = slope * (x + 1);
 
       if (freqDataLength > slopeAmount)
-        xScale += powf(2.0 * (freqDataLength - slopeAmount), (x + 1.0) / NUM_BANDS) * 0.5;
+        xScale += powf(2.0 * (freqDataLength - slopeAmount), (x + 1.0) / m_numBands) * 0.5;
 
       if (xScale > freqDataLength)
         xScale = freqDataLength;
@@ -430,9 +457,9 @@ void CVisualizationSpectrum::AudioData(const float* pAudioData, size_t iAudioDat
       size_t highFreq = xScale;
 
       // Calculate bars per octave = 1 / octaves
-      m_hScales[x] = 1.0 / log2((highFreq + 0.5) / (lowFreq - 0.5));
+      m_hScales.push_back(1.0 / log2((highFreq + 0.5) / (lowFreq - 0.5)));
 
-      m_xScales[x] = xScale;
+      m_xScales.push_back(xScale);
       prevXScale = xScale;
     }
   }
@@ -453,20 +480,19 @@ void CVisualizationSpectrum::AudioData(const float* pAudioData, size_t iAudioDat
   // FFT
   m_transform->calc(pAudioData, m_freqData);
 
-  // Shift backwards by one row
-  for (int x = 0; x < NUM_BANDS; x++)
-  {
+  // Step backwards by one row
+  m_heightsRingBufBegin = (m_heightsRingBufBegin + (m_heights.size() - m_numBands)) % m_heights.size();
 
-    for (int y = NUM_BANDS - 1; y > 0; y--)
-    {
-      m_heights[y][x] = m_heights[y - 1][x];
-      m_cHeights[y][x] = m_cHeights[y - 1][x];
-    }
+  // Duplicate cHeights front row
+  for (size_t i = m_heightsRingBufBegin; i < m_heightsRingBufBegin + m_numBands; i++)
+  {
+    size_t j = i + m_numBands;
+    m_cHeights[i % m_cHeights.size()] = m_cHeights[j % m_cHeights.size()];
   }
 
   // Make new heights front row
   size_t prevXScale = 0;
-  for (size_t x = 0; x < NUM_BANDS; x++)
+  for (size_t x = 0; x < m_numBands; x++)
   {
     size_t xScale = m_xScales[x];
     GLfloat power = 0.0f;
@@ -492,7 +518,8 @@ void CVisualizationSpectrum::AudioData(const float* pAudioData, size_t iAudioDat
     if (height < 0.0f)
       height = 0.0f;
 
-    m_heights[0][x] = height * m_hScale;
+    size_t i = (m_heightsRingBufBegin + x) % m_heights.size();
+    m_heights[i] = height * m_hScale;
 
     prevXScale = xScale;
   }
@@ -507,6 +534,8 @@ ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName, 
 {
   if (settingName.empty() || settingValue.empty())
     return ADDON_STATUS_UNKNOWN;
+
+  std::unique_lock<std::mutex> lock(m_mutex);
 
   int value = settingValue.GetInt();
 
@@ -576,6 +605,13 @@ ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName, 
         break;
       }
     }
+  }
+  else if (settingName == "num_bands")
+  {
+    if (value < 2) // lone bar not supported
+      m_numBands = 2;
+    else
+      m_numBands = value;
   }
   else if (settingName == "offset_y")
   {

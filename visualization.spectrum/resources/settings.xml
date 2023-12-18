@@ -3,6 +3,27 @@
     <category id="main" label="128" help="0">
       <group id="1" label="0">
 
+        <setting id="num_bands" type="integer" label="30027">
+          <default>32</default>
+          <constraints>
+            <minimum>16</minimum>
+            <step>4</step>
+            <maximum>128</maximum>
+          </constraints>
+          <control type="slider" format="integer">
+            <formatlabel>30028</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
         <setting id="mode" type="integer" label="30000" help="0">
           <default>0</default>
           <constraints>
