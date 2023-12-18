@@ -108,6 +108,27 @@
           </dependencies>
         </setting>
 
+        <setting id="bar_width" type="integer" label="30036">
+          <default>50</default>
+          <constraints>
+            <minimum>25</minimum>
+            <step>5</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="slider" format="integer">
+            <formatlabel>30022</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
         <setting id="rotation_angle" type="integer" label="30017">
           <default>-15</default>
           <constraints>

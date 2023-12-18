@@ -169,3 +169,7 @@ msgstr ""
 msgctxt "#30035"
 msgid "Green"
 msgstr ""
+
+msgctxt "#30036"
+msgid "Bar width"
+msgstr ""

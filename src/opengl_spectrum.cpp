@@ -106,6 +106,7 @@ private:
   GLfloat m_hSpeed = 0.05f;
 
   GLfloat m_pointSize = 0.0f;
+  GLfloat m_wScale = 0.5f;
 
   GLfloat m_xAngle = 10.0f; // around 11° on 16:9 looks similar to the former 20° on squeezed 1:1
   GLfloat m_yAngle = 45.0f;
@@ -340,7 +341,7 @@ void CVisualizationSpectrum::RenderBufferData()
   if (m_vertexBufferData.capacity() < glBufferDataCapacity)
     m_vertexBufferData.reserve(glBufferDataCapacity);
 
-  GLfloat halfBarWidth = m_fieldScale / (m_numBands - 1.0f) * 0.5f * 0.5f;
+  GLfloat halfBarWidth = m_fieldScale / m_numBands * m_wScale * 0.5f;
 
   GLfloat halfTopColorHeight = m_hScale * COLOR_HEIGHT_ADJUST * 0.5f;
 
@@ -442,14 +443,14 @@ void CVisualizationSpectrum::RenderBufferData()
 
   for (size_t y = 0; y <= yMax; y++)
   {
-    GLfloat zMid = m_fieldScale * (0.5f - y / (float)yMax);
+    GLfloat zMid = m_fieldScale * (0.5f - (y + 0.5f) / m_numBands);
 
     bck = zMid - halfBarWidth;
     fnt = zMid + halfBarWidth;
 
     for (size_t x = 0; x <= xMax; x++)
     {
-      GLfloat xMid = m_fieldScale * (-0.5f + x / (float)xMax);
+      GLfloat xMid = m_fieldScale * (-0.5f + (x + 0.5f) / m_numBands);
 
       lft = xMid - halfBarWidth;
       rgt = xMid + halfBarWidth;
@@ -709,6 +710,10 @@ ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName, 
         break;
       }
     }
+  }
+  else if (settingName == "bar_width")
+  {
+    m_wScale = value / 100.0f;
   }
   else if (settingName == "color_mode")
   {
