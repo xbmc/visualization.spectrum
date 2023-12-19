@@ -103,7 +103,7 @@ msgid "{0:d}°"
 msgstr ""
 
 msgctxt "#30019"
-msgid "Turn continuously"
+msgid "Undefined"
 msgstr ""
 
 msgctxt "#30020"
@@ -176,4 +176,73 @@ msgstr ""
 
 msgctxt "#30037"
 msgid "Smooth animation"
+msgstr ""
+
+msgctxt "#30038"
+msgid "Off"
+msgstr ""
+
+msgctxt "#30039"
+msgid "On"
+msgstr ""
+
+msgctxt "#30040"
+msgid "Name"
+msgstr ""
+
+msgctxt "#30041"
+msgid "Skip on previous/next/random preset"
+msgstr ""
+
+msgctxt "#30042"
+msgid "Zero"
+msgstr ""
+
+msgctxt "#30043"
+msgid "Reverse rotation"
+msgstr ""
+
+msgctxt "#30044"
+msgid "Opposite of template"
+msgstr ""
+
+
+msgctxt "#30100"
+msgid "Template"
+msgstr ""
+
+msgctxt "#30101"
+msgid "#1 (Legacy)"
+msgstr ""
+
+msgctxt "#30102"
+msgid "#2 (Twister 32)"
+msgstr ""
+
+msgctxt "#30103"
+msgid "#3 (Twister 32 stop)"
+msgstr ""
+
+msgctxt "#30104"
+msgid "#4 (Twister)"
+msgstr ""
+
+msgctxt "#30105"
+msgid "#5 (Twister stop)"
+msgstr ""
+
+msgctxt "#30106"
+msgid "#6 (Twister reverse)"
+msgstr ""
+
+msgctxt "#30107"
+msgid "#7 (Odyssey)"
+msgstr ""
+
+msgctxt "#30108"
+msgid "#8 (Matrix)"
+msgstr ""
+
+msgctxt "#30109"
+msgid "#9 (Trainspotting)"
 msgstr ""

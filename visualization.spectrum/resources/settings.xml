@@ -1,16 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <settings version="1">
-  <section id="addon" label="0" help="0">
-    <category id="main" label="128" help="0">
-      <group id="1" label="0">
+  <section id="visualization.spectrum">
+    <category id="main" label="30100" help="0">
+      <group id="0_0" label="0">
 
-        <setting id="num_bands" type="integer" label="30027">
-          <default>32</default>
+        <!-- internal setting (hidden) -->
+
+        <setting id="active_preset" type="integer" label="0">
+          <level>4</level> <!-- <visible>false</visible> -->
+          <default>1</default>
+        </setting>
+
+        <!-- general settings (presets template) -->
+
+        <setting id="name_0" type="string" label="30040">
+          <!-- never enabled (information only) -->
+          <enable>false</enable>
+          <default>Presets Template</default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string">
+            <heading>30040</heading>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="skip_preset_0" type="boolean" label="30041">
+          <!-- never enabled (only there to match preset categories layout) -->
+          <enable>false</enable>
+          <default>false</default>
+          <control type="toggle"/>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="1_0" label="0">
+
+        <setting id="num_bands_0" type="integer" label="30027">
+          <default>80</default>
           <constraints>
             <minimum>16</minimum>
-            <step>4</step>
+            <step>16</step>
             <maximum>128</maximum>
           </constraints>
-          <control type="slider" format="integer">
+          <control type="spinner" format="string">
             <formatlabel>30028</formatlabel>
             <popup>false</popup>
           </control>
@@ -24,30 +72,18 @@
           </dependencies>
         </setting>
 
-        <setting id="mode" type="integer" label="30000" help="0">
-          <default>0</default>
+        <setting id="field_size_0" type="integer" label="30025">
+          <default>120</default>
           <constraints>
-            <options>
-              <option label="30001">0</option>
-              <option label="30002">1</option>
-              <option label="30003">2</option>
-            </options>
+            <minimum>50</minimum>
+            <step>5</step>
+            <maximum>150</maximum>
           </constraints>
-          <control type="spinner" format="string" />
-        </setting>
-
-        <setting id="pointsize" type="integer" label="30015">
-          <default>3</default>
-          <constraints>
-            <minimum>1</minimum>
-            <step>1</step>
-            <maximum>50</maximum>
-          </constraints>
-          <control type="slider" format="integer">
-            <formatlabel>30016</formatlabel>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
           </control>
           <dependencies>
-            <dependency type="enable" setting="mode" operator="is">2</dependency>
             <dependency type="visible">
               <or>
                 <condition on="property" name="IsDefined">HAS_GL</condition>
@@ -57,23 +93,163 @@
           </dependencies>
         </setting>
 
-        <setting id="bar_height" type="integer" label="30004" help="0">
+      </group>
+      <group id="2_0" label="0">
+
+        <setting id="bar_width_0" type="integer" label="30036">
+          <default>90</default>
+          <constraints>
+            <minimum>25</minimum>
+            <step>5</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="smooth_anim_0" type="integer" label="30037">
           <default>1</default>
           <constraints>
             <options>
+              <option label="30038">0</option>
+              <option label="30039">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="3_0" label="0">
+
+        <setting id="rotation_angle_0" type="integer" label="30017">
+          <default>45</default>
+          <constraints>
+            <minimum>0</minimum>
+            <step>15</step>
+            <maximum>360</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30018</formatlabel>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_speed_0" type="integer" label="30026" help="0">
+          <default>0</default>
+          <constraints>
+            <options>
+              <option label="30042">-3</option>
+              <option label="30010">-2</option>
+              <option label="30011">-1</option>
+              <option label="30012">0</option>
+              <option label="30013">1</option>
+              <option label="30014">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_reverse_0" type="integer" label="30043">
+          <default>0</default>
+          <constraints>
+            <options>
+              <option label="30038">0</option>
+              <option label="30039">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_x_0" type="integer" label="30022">
+          <default>10</default>
+          <constraints>
+            <minimum>0</minimum>
+            <step>5</step>
+            <maximum>90</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30018</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="4_0" label="0">
+
+        <setting id="bar_height_0" type="integer" label="30004" help="0">
+          <default>0</default>
+          <constraints>
+            <options>
+              <option label="30032">4</option>
               <option label="30005">0</option>
               <option label="30006">1</option>
               <option label="30007">2</option>
               <option label="30008">3</option>
-              <option label="30032">4</option>
             </options>
           </constraints>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
           <control type="spinner" format="string" />
         </setting>
 
         <!-- Bar heigth speed -->
-        <setting id="speed" type="integer" label="30009" help="0">
-          <default>2</default>
+        <setting id="speed_0" type="integer" label="30009" help="0">
+          <default>4</default>
           <constraints>
             <options>
               <option label="30010">0</option>
@@ -83,10 +259,18 @@
               <option label="30014">4</option>
             </options>
           </constraints>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
           <control type="spinner" format="string" />
         </setting>
 
-        <setting id="color_mode" type="integer" label="30029" help="0">
+        <setting id="color_mode_0" type="integer" label="30029" help="0">
           <default>1</default>
           <constraints>
             <options>
@@ -108,15 +292,18 @@
           </dependencies>
         </setting>
 
-        <setting id="bar_width" type="integer" label="30036">
-          <default>50</default>
+      </group>
+      <group id="5_0" label="0">
+
+        <setting id="offset_y_0" type="integer" label="30023">
+          <default>0</default>
           <constraints>
-            <minimum>25</minimum>
+            <minimum>-150</minimum>
             <step>5</step>
             <maximum>100</maximum>
           </constraints>
-          <control type="slider" format="integer">
-            <formatlabel>30022</formatlabel>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
             <popup>false</popup>
           </control>
           <dependencies>
@@ -129,7 +316,94 @@
           </dependencies>
         </setting>
 
-        <setting id="smooth_anim" type="boolean" label="30037">
+        <setting id="db_range_0" type="integer" label="30020">
+          <default>48</default>
+          <constraints>
+            <minimum>24</minimum>
+            <step>3</step>
+            <maximum>144</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30021</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="6_0" label="0">
+
+        <setting id="mode_0" type="integer" label="30000" help="0">
+          <default>0</default>
+          <constraints>
+            <options>
+              <option label="30001">0</option>
+              <option label="30002">1</option>
+              <option label="30003">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="pointsize_0" type="integer" label="30015">
+          <default>3</default>
+          <constraints>
+            <minimum>1</minimum>
+            <step>1</step>
+            <maximum>50</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30016</formatlabel>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+    </category>
+    <category id="preset_1" label="30101" help="0">
+      <group id="0_1" label="0">
+
+        <setting id="name" type="string" label="30040">
+          <default>Legacy</default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string">
+            <heading>30040</heading>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="skip_preset" type="boolean" label="30041">
           <default>true</default>
           <control type="toggle"/>
           <dependencies>
@@ -142,71 +416,18 @@
           </dependencies>
         </setting>
 
-        <setting id="rotation_angle" type="integer" label="30017">
-          <default>-15</default>
+      </group>
+      <group id="1_1" label="0">
+
+        <setting id="num_bands" type="integer" label="30027">
+          <default>16</default>
           <constraints>
-            <minimum label="30019">-15</minimum>
-            <step>15</step>
-            <maximum>360</maximum>
+            <minimum label="30100">0</minimum>
+            <step>16</step>
+            <maximum>128</maximum>
           </constraints>
           <control type="spinner" format="string">
-            <formatlabel>30018</formatlabel>
-          </control>
-        </setting>
-
-        <setting id="rotation_speed" type="integer" label="30026" help="0">
-          <default>0</default>
-          <constraints>
-            <options>
-              <option label="30010">-2</option>
-              <option label="30011">-1</option>
-              <option label="30012">0</option>
-              <option label="30013">1</option>
-              <option label="30014">2</option>
-            </options>
-          </constraints>
-          <control type="spinner" format="string" />
-          <dependencies>
-            <dependency type="visible">
-              <or>
-                <condition on="property" name="IsDefined">HAS_GL</condition>
-                <condition on="property" name="IsDefined">HAS_GLES</condition>
-              </or>
-            </dependency>
-            <dependency type="enable" setting="rotation_angle" operator="lt">0</dependency>
-          </dependencies>
-        </setting>
-
-        <setting id="rotation_x" type="integer" label="30022">
-          <default>10</default>
-          <constraints>
-            <minimum>0</minimum>
-            <step>5</step>
-            <maximum>90</maximum>
-          </constraints>
-          <control type="slider" format="integer">
-            <formatlabel>30018</formatlabel>
-            <popup>false</popup>
-          </control>
-          <dependencies>
-            <dependency type="visible">
-              <or>
-                <condition on="property" name="IsDefined">HAS_GL</condition>
-                <condition on="property" name="IsDefined">HAS_GLES</condition>
-              </or>
-            </dependency>
-          </dependencies>
-        </setting>
-
-        <setting id="offset_y" type="integer" label="30023">
-          <default>-25</default>
-          <constraints>
-            <minimum>-150</minimum>
-            <step>5</step>
-            <maximum>100</maximum>
-          </constraints>
-          <control type="slider" format="integer">
-            <formatlabel>30024</formatlabel>
+            <formatlabel>30028</formatlabel>
             <popup>false</popup>
           </control>
           <dependencies>
@@ -222,11 +443,215 @@
         <setting id="field_size" type="integer" label="30025">
           <default>100</default>
           <constraints>
-            <minimum>50</minimum>
+            <minimum label="30100">45</minimum>
             <step>5</step>
             <maximum>150</maximum>
           </constraints>
-          <control type="slider" format="integer">
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="2_1" label="0">
+
+        <setting id="bar_width" type="integer" label="30036">
+          <default>50</default>
+          <constraints>
+            <minimum label="30100">20</minimum>
+            <step>5</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="smooth_anim" type="integer" label="30037">
+          <default>0</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30038">0</option>
+              <option label="30039">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="3_1" label="0">
+
+        <setting id="rotation_angle" type="integer" label="30017">
+          <default>-15</default>
+          <constraints>
+            <minimum label="30019">-15</minimum>
+            <step>15</step>
+            <maximum>360</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30018</formatlabel>
+          </control>
+        </setting>
+
+        <setting id="rotation_speed" type="integer" label="30026" help="0">
+          <default>-4</default>
+          <constraints>
+            <options>
+              <option label="30100">-4</option>
+              <option label="30042">-3</option>
+              <option label="30010">-2</option>
+              <option label="30011">-1</option>
+              <option label="30012">0</option>
+              <option label="30013">1</option>
+              <option label="30014">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_reverse" type="integer" label="30043">
+          <default>0</default>
+          <constraints>
+            <options>
+              <option label="30100">0</option>
+              <option label="30044">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_x" type="integer" label="30022">
+          <default>-5</default>
+          <constraints>
+            <minimum label="30100">-5</minimum>
+            <step>5</step>
+            <maximum>90</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30018</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="4_1" label="0">
+
+        <setting id="bar_height" type="integer" label="30004" help="0">
+          <default>1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30032">4</option>
+              <option label="30005">0</option>
+              <option label="30006">1</option>
+              <option label="30007">2</option>
+              <option label="30008">3</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+        </setting>
+
+        <!-- Bar heigth speed -->
+        <setting id="speed" type="integer" label="30009" help="0">
+          <default>2</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30010">0</option>
+              <option label="30011">1</option>
+              <option label="30012">2</option>
+              <option label="30013">3</option>
+              <option label="30014">4</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+        </setting>
+
+        <setting id="color_mode" type="integer" label="30029" help="0">
+          <default>0</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30030">0</option>
+              <option label="30031">1</option>
+              <option label="30033">2</option>
+              <option label="30034">3</option>
+              <option label="30035">4</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="5_1" label="0">
+
+        <setting id="offset_y" type="integer" label="30023">
+          <default>-25</default>
+          <constraints>
+            <minimum label="30100">-155</minimum>
+            <step>5</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="spinner" format="string">
             <formatlabel>30024</formatlabel>
             <popup>false</popup>
           </control>
@@ -241,17 +666,3118 @@
         </setting>
 
         <setting id="db_range" type="integer" label="30020">
-          <default>48</default>
+          <default>21</default>
           <constraints>
-            <minimum>24</minimum>
+            <minimum label="30100">21</minimum>
             <step>3</step>
             <maximum>144</maximum>
           </constraints>
-          <control type="slider" format="integer">
+          <control type="spinner" format="string">
             <formatlabel>30021</formatlabel>
             <popup>false</popup>
           </control>
           <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="6_1" label="0">
+
+        <setting id="mode" type="integer" label="30000" help="0">
+          <default>0</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30001">0</option>
+              <option label="30002">1</option>
+              <option label="30003">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+        </setting>
+
+        <setting id="pointsize" type="integer" label="30015">
+          <default>0</default>
+          <constraints>
+            <minimum label="30100">0</minimum>
+            <step>1</step>
+            <maximum>50</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30016</formatlabel>
+          </control>
+          <dependencies>
+            <dependency type="enable">
+              <or>
+                <condition setting="mode">-1</condition>
+                <condition setting="mode">2</condition>
+              </or>
+            </dependency>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+    </category>
+    <category id="preset_2" label="30102" help="0">
+      <group id="0_2" label="0">
+
+        <setting id="name_2" type="string" label="30040">
+          <default>Twister 32</default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string">
+            <heading>30040</heading>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="skip_preset_2" type="boolean" label="30041">
+          <default>true</default>
+          <control type="toggle"/>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="1_2" label="0">
+
+        <setting id="num_bands_2" type="integer" label="30027">
+          <default>32</default>
+          <constraints>
+            <minimum label="30100">0</minimum>
+            <step>16</step>
+            <maximum>128</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30028</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="field_size_2" type="integer" label="30025">
+          <default>100</default>
+          <constraints>
+            <minimum label="30100">45</minimum>
+            <step>5</step>
+            <maximum>150</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="2_2" label="0">
+
+        <setting id="bar_width_2" type="integer" label="30036">
+          <default>50</default>
+          <constraints>
+            <minimum label="30100">20</minimum>
+            <step>5</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="smooth_anim_2" type="integer" label="30037">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30038">0</option>
+              <option label="30039">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="3_2" label="0">
+
+        <setting id="rotation_angle_2" type="integer" label="30017">
+          <default>-15</default>
+          <constraints>
+            <minimum label="30019">-15</minimum>
+            <step>15</step>
+            <maximum>360</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30018</formatlabel>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_speed_2" type="integer" label="30026" help="0">
+          <default>-4</default>
+          <constraints>
+            <options>
+              <option label="30100">-4</option>
+              <option label="30042">-3</option>
+              <option label="30010">-2</option>
+              <option label="30011">-1</option>
+              <option label="30012">0</option>
+              <option label="30013">1</option>
+              <option label="30014">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_reverse_2" type="integer" label="30043">
+          <default>0</default>
+          <constraints>
+            <options>
+              <option label="30100">0</option>
+              <option label="30044">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_reverse_2" type="integer" label="30043">
+          <default>0</default>
+          <constraints>
+            <options>
+              <option label="30100">0</option>
+              <option label="30044">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_x_2" type="integer" label="30022">
+          <default>-5</default>
+          <constraints>
+            <minimum label="30100">-5</minimum>
+            <step>5</step>
+            <maximum>90</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30018</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="4_2" label="0">
+
+        <setting id="bar_height_2" type="integer" label="30004" help="0">
+          <default>1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30032">4</option>
+              <option label="30005">0</option>
+              <option label="30006">1</option>
+              <option label="30007">2</option>
+              <option label="30008">3</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <!-- Bar heigth speed -->
+        <setting id="speed_2" type="integer" label="30009" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30010">0</option>
+              <option label="30011">1</option>
+              <option label="30012">2</option>
+              <option label="30013">3</option>
+              <option label="30014">4</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="color_mode_2" type="integer" label="30029" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30030">0</option>
+              <option label="30031">1</option>
+              <option label="30033">2</option>
+              <option label="30034">3</option>
+              <option label="30035">4</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="5_2" label="0">
+
+        <setting id="offset_y_2" type="integer" label="30023">
+          <default>-25</default>
+          <constraints>
+            <minimum label="30100">-155</minimum>
+            <step>5</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="db_range_2" type="integer" label="30020">
+          <default>21</default>
+          <constraints>
+            <minimum label="30100">21</minimum>
+            <step>3</step>
+            <maximum>144</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30021</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="6_2" label="0">
+
+        <setting id="mode_2" type="integer" label="30000" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30001">0</option>
+              <option label="30002">1</option>
+              <option label="30003">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="pointsize_2" type="integer" label="30015">
+          <default>0</default>
+          <constraints>
+            <minimum label="30100">0</minimum>
+            <step>1</step>
+            <maximum>50</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30016</formatlabel>
+          </control>
+          <dependencies>
+            <dependency type="enable">
+              <or>
+                <condition setting="mode_2">-1</condition>
+                <condition setting="mode_2">2</condition>
+              </or>
+            </dependency>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+    </category>
+    <category id="preset_3" label="30103" help="0">
+      <group id="0_3" label="0">
+
+        <setting id="name_3" type="string" label="30040">
+          <default>Twister 32 stop</default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string">
+            <heading>30040</heading>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="skip_preset_3" type="boolean" label="30041">
+          <default>true</default>
+          <control type="toggle"/>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="1_3" label="0">
+
+        <setting id="num_bands_3" type="integer" label="30027">
+          <default>32</default>
+          <constraints>
+            <minimum label="30100">0</minimum>
+            <step>16</step>
+            <maximum>128</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30028</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="field_size_3" type="integer" label="30025">
+          <default>100</default>
+          <constraints>
+            <minimum label="30100">45</minimum>
+            <step>5</step>
+            <maximum>150</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="2_3" label="0">
+
+        <setting id="bar_width_3" type="integer" label="30036">
+          <default>50</default>
+          <constraints>
+            <minimum label="30100">20</minimum>
+            <step>5</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="smooth_anim_3" type="integer" label="30037">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30038">0</option>
+              <option label="30039">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="3_3" label="0">
+
+        <setting id="rotation_angle_3" type="integer" label="30017">
+          <default>-15</default>
+          <constraints>
+            <minimum label="30019">-15</minimum>
+            <step>15</step>
+            <maximum>360</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30018</formatlabel>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_speed_3" type="integer" label="30026" help="0">
+          <default>-3</default>
+          <constraints>
+            <options>
+              <option label="30100">-4</option>
+              <option label="30042">-3</option>
+              <option label="30010">-2</option>
+              <option label="30011">-1</option>
+              <option label="30012">0</option>
+              <option label="30013">1</option>
+              <option label="30014">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_reverse_3" type="integer" label="30043">
+          <default>0</default>
+          <constraints>
+            <options>
+              <option label="30100">0</option>
+              <option label="30044">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_x_3" type="integer" label="30022">
+          <default>-5</default>
+          <constraints>
+            <minimum label="30100">-5</minimum>
+            <step>5</step>
+            <maximum>90</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30018</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="4_3" label="0">
+
+        <setting id="bar_height_3" type="integer" label="30004" help="0">
+          <default>1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30032">4</option>
+              <option label="30005">0</option>
+              <option label="30006">1</option>
+              <option label="30007">2</option>
+              <option label="30008">3</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <!-- Bar heigth speed -->
+        <setting id="speed_3" type="integer" label="30009" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30010">0</option>
+              <option label="30011">1</option>
+              <option label="30012">2</option>
+              <option label="30013">3</option>
+              <option label="30014">4</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="color_mode_3" type="integer" label="30029" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30030">0</option>
+              <option label="30031">1</option>
+              <option label="30033">2</option>
+              <option label="30034">3</option>
+              <option label="30035">4</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="5_3" label="0">
+
+        <setting id="offset_y_3" type="integer" label="30023">
+          <default>-25</default>
+          <constraints>
+            <minimum label="30100">-155</minimum>
+            <step>5</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="db_range_3" type="integer" label="30020">
+          <default>21</default>
+          <constraints>
+            <minimum label="30100">21</minimum>
+            <step>3</step>
+            <maximum>144</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30021</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="6_3" label="0">
+
+        <setting id="mode_3" type="integer" label="30000" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30001">0</option>
+              <option label="30002">1</option>
+              <option label="30003">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="pointsize_3" type="integer" label="30015">
+          <default>0</default>
+          <constraints>
+            <minimum label="30100">0</minimum>
+            <step>1</step>
+            <maximum>50</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30016</formatlabel>
+          </control>
+          <dependencies>
+            <dependency type="enable">
+              <or>
+                <condition setting="mode_3">-1</condition>
+                <condition setting="mode_3">2</condition>
+              </or>
+            </dependency>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+    </category>
+    <category id="preset_4" label="30104" help="0">
+      <group id="0_4" label="0">
+
+        <setting id="name_4" type="string" label="30040">
+          <default>Twister</default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string">
+            <heading>30040</heading>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="skip_preset_4" type="boolean" label="30041">
+          <default>false</default>
+          <control type="toggle"/>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="1_4" label="0">
+
+        <setting id="num_bands_4" type="integer" label="30027">
+          <default>0</default>
+          <constraints>
+            <minimum label="30100">0</minimum>
+            <step>16</step>
+            <maximum>128</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30028</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="field_size_4" type="integer" label="30025">
+          <default>45</default>
+          <constraints>
+            <minimum label="30100">45</minimum>
+            <step>5</step>
+            <maximum>150</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="2_4" label="0">
+
+        <setting id="bar_width_4" type="integer" label="30036">
+          <default>20</default>
+          <constraints>
+            <minimum label="30100">20</minimum>
+            <step>5</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="smooth_anim_4" type="integer" label="30037">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30038">0</option>
+              <option label="30039">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="3_4" label="0">
+
+        <setting id="rotation_angle_4" type="integer" label="30017">
+          <default>-15</default>
+          <constraints>
+            <minimum label="30019">-15</minimum>
+            <step>15</step>
+            <maximum>360</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30018</formatlabel>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_speed_4" type="integer" label="30026" help="0">
+          <default>-4</default>
+          <constraints>
+            <options>
+              <option label="30100">-4</option>
+              <option label="30042">-3</option>
+              <option label="30010">-2</option>
+              <option label="30011">-1</option>
+              <option label="30012">0</option>
+              <option label="30013">1</option>
+              <option label="30014">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_reverse_4" type="integer" label="30043">
+          <default>0</default>
+          <constraints>
+            <options>
+              <option label="30100">0</option>
+              <option label="30044">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_x_4" type="integer" label="30022">
+          <default>-5</default>
+          <constraints>
+            <minimum label="30100">-5</minimum>
+            <step>5</step>
+            <maximum>90</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30018</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="4_4" label="0">
+
+        <setting id="bar_height_4" type="integer" label="30004" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30032">4</option>
+              <option label="30005">0</option>
+              <option label="30006">1</option>
+              <option label="30007">2</option>
+              <option label="30008">3</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <!-- Bar heigth speed -->
+        <setting id="speed_4" type="integer" label="30009" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30010">0</option>
+              <option label="30011">1</option>
+              <option label="30012">2</option>
+              <option label="30013">3</option>
+              <option label="30014">4</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="color_mode_4" type="integer" label="30029" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30030">0</option>
+              <option label="30031">1</option>
+              <option label="30033">2</option>
+              <option label="30034">3</option>
+              <option label="30035">4</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="5_4" label="0">
+
+        <setting id="offset_y_4" type="integer" label="30023">
+          <default>-155</default>
+          <constraints>
+            <minimum label="30100">-155</minimum>
+            <step>5</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="db_range_4" type="integer" label="30020">
+          <default>21</default>
+          <constraints>
+            <minimum label="30100">21</minimum>
+            <step>3</step>
+            <maximum>144</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30021</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="6_4" label="0">
+
+        <setting id="mode_4" type="integer" label="30000" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30001">0</option>
+              <option label="30002">1</option>
+              <option label="30003">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="pointsize_4" type="integer" label="30015">
+          <default>0</default>
+          <constraints>
+            <minimum label="30100">0</minimum>
+            <step>1</step>
+            <maximum>50</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30016</formatlabel>
+          </control>
+          <dependencies>
+            <dependency type="enable">
+              <or>
+                <condition setting="mode_4">-1</condition>
+                <condition setting="mode_4">2</condition>
+              </or>
+            </dependency>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+    </category>
+    <category id="preset_5" label="30105" help="0">
+      <group id="0_5" label="0">
+
+        <setting id="name_5" type="string" label="30040">
+          <default>Twister stop</default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string">
+            <heading>30040</heading>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="skip_preset_5" type="boolean" label="30041">
+          <default>false</default>
+          <control type="toggle"/>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="1_5" label="0">
+
+        <setting id="num_bands_5" type="integer" label="30027">
+          <default>0</default>
+          <constraints>
+            <minimum label="30100">0</minimum>
+            <step>16</step>
+            <maximum>128</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30028</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="field_size_5" type="integer" label="30025">
+          <default>45</default>
+          <constraints>
+            <minimum label="30100">45</minimum>
+            <step>5</step>
+            <maximum>150</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="2_5" label="0">
+
+        <setting id="bar_width_5" type="integer" label="30036">
+          <default>20</default>
+          <constraints>
+            <minimum label="30100">20</minimum>
+            <step>5</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="smooth_anim_5" type="integer" label="30037">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30038">0</option>
+              <option label="30039">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="3_5" label="0">
+
+        <setting id="rotation_angle_5" type="integer" label="30017">
+          <default>-15</default>
+          <constraints>
+            <minimum label="30019">-15</minimum>
+            <step>15</step>
+            <maximum>360</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30018</formatlabel>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_speed_5" type="integer" label="30026" help="0">
+          <default>-3</default>
+          <constraints>
+            <options>
+              <option label="30100">-4</option>
+              <option label="30042">-3</option>
+              <option label="30010">-2</option>
+              <option label="30011">-1</option>
+              <option label="30012">0</option>
+              <option label="30013">1</option>
+              <option label="30014">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_reverse_5" type="integer" label="30043">
+          <default>0</default>
+          <constraints>
+            <options>
+              <option label="30100">0</option>
+              <option label="30044">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_x_5" type="integer" label="30022">
+          <default>-5</default>
+          <constraints>
+            <minimum label="30100">-5</minimum>
+            <step>5</step>
+            <maximum>90</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30018</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="4_5" label="0">
+
+        <setting id="bar_height_5" type="integer" label="30004" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30032">4</option>
+              <option label="30005">0</option>
+              <option label="30006">1</option>
+              <option label="30007">2</option>
+              <option label="30008">3</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <!-- Bar heigth speed -->
+        <setting id="speed_5" type="integer" label="30009" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30010">0</option>
+              <option label="30011">1</option>
+              <option label="30012">2</option>
+              <option label="30013">3</option>
+              <option label="30014">4</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="color_mode_5" type="integer" label="30029" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30030">0</option>
+              <option label="30031">1</option>
+              <option label="30033">2</option>
+              <option label="30034">3</option>
+              <option label="30035">4</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="5_5" label="0">
+
+        <setting id="offset_y_5" type="integer" label="30023">
+          <default>-155</default>
+          <constraints>
+            <minimum label="30100">-155</minimum>
+            <step>5</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="db_range_5" type="integer" label="30020">
+          <default>21</default>
+          <constraints>
+            <minimum label="30100">21</minimum>
+            <step>3</step>
+            <maximum>144</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30021</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="6_5" label="0">
+
+        <setting id="mode_5" type="integer" label="30000" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30001">0</option>
+              <option label="30002">1</option>
+              <option label="30003">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="pointsize_5" type="integer" label="30015">
+          <default>0</default>
+          <constraints>
+            <minimum label="30100">0</minimum>
+            <step>1</step>
+            <maximum>50</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30016</formatlabel>
+          </control>
+          <dependencies>
+            <dependency type="enable">
+              <or>
+                <condition setting="mode_5">-1</condition>
+                <condition setting="mode_5">2</condition>
+              </or>
+            </dependency>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+    </category>
+    <category id="preset_6" label="30106" help="0">
+      <group id="0_6" label="0">
+
+        <setting id="name_6" type="string" label="30040">
+          <default>Twister reverse</default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string">
+            <heading>30040</heading>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="skip_preset_6" type="boolean" label="30041">
+          <default>false</default>
+          <control type="toggle"/>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="1_6" label="0">
+
+        <setting id="num_bands_6" type="integer" label="30027">
+          <default>0</default>
+          <constraints>
+            <minimum label="30100">0</minimum>
+            <step>16</step>
+            <maximum>128</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30028</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="field_size_6" type="integer" label="30025">
+          <default>45</default>
+          <constraints>
+            <minimum label="30100">45</minimum>
+            <step>5</step>
+            <maximum>150</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="2_6" label="0">
+
+        <setting id="bar_width_6" type="integer" label="30036">
+          <default>20</default>
+          <constraints>
+            <minimum label="30100">20</minimum>
+            <step>5</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="smooth_anim_6" type="integer" label="30037">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30038">0</option>
+              <option label="30039">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="3_6" label="0">
+
+        <setting id="rotation_angle_6" type="integer" label="30017">
+          <default>-1</default>
+          <constraints>
+            <minimum label="30019">-15</minimum>
+            <step>15</step>
+            <maximum>360</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30018</formatlabel>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_speed_6" type="integer" label="30026" help="0">
+          <default>-4</default>
+          <constraints>
+            <options>
+              <option label="30100">-4</option>
+              <option label="30042">-3</option>
+              <option label="30010">-2</option>
+              <option label="30011">-1</option>
+              <option label="30012">0</option>
+              <option label="30013">1</option>
+              <option label="30014">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_reverse_6" type="integer" label="30043">
+          <default>1</default>
+          <constraints>
+            <options>
+              <option label="30100">0</option>
+              <option label="30044">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_x_6" type="integer" label="30022">
+          <default>-5</default>
+          <constraints>
+            <minimum label="30100">-5</minimum>
+            <step>5</step>
+            <maximum>90</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30018</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="4_6" label="0">
+
+        <setting id="bar_height_6" type="integer" label="30004" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30032">4</option>
+              <option label="30005">0</option>
+              <option label="30006">1</option>
+              <option label="30007">2</option>
+              <option label="30008">3</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <!-- Bar heigth speed -->
+        <setting id="speed_6" type="integer" label="30009" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30010">0</option>
+              <option label="30011">1</option>
+              <option label="30012">2</option>
+              <option label="30013">3</option>
+              <option label="30014">4</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="color_mode_6" type="integer" label="30029" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30030">0</option>
+              <option label="30031">1</option>
+              <option label="30033">2</option>
+              <option label="30034">3</option>
+              <option label="30035">4</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="5_6" label="0">
+
+        <setting id="offset_y_6" type="integer" label="30023">
+          <default>-155</default>
+          <constraints>
+            <minimum label="30100">-155</minimum>
+            <step>5</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="db_range_6" type="integer" label="30020">
+          <default>21</default>
+          <constraints>
+            <minimum label="30100">21</minimum>
+            <step>3</step>
+            <maximum>144</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30021</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="6_6" label="0">
+
+        <setting id="mode_6" type="integer" label="30000" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30001">0</option>
+              <option label="30002">1</option>
+              <option label="30003">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="pointsize_6" type="integer" label="30015">
+          <default>0</default>
+          <constraints>
+            <minimum label="30100">0</minimum>
+            <step>1</step>
+            <maximum>50</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30016</formatlabel>
+          </control>
+          <dependencies>
+            <dependency type="enable">
+              <or>
+                <condition setting="mode_6">-1</condition>
+                <condition setting="mode_6">2</condition>
+              </or>
+            </dependency>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+    </category>
+    <category id="preset_7" label="30107" help="0">
+      <group id="0_7" label="0">
+
+        <setting id="name_7" type="string" label="30040">
+          <default>Odyssey</default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string">
+            <heading>30040</heading>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="skip_preset_7" type="boolean" label="30041">
+          <default>false</default>
+          <control type="toggle"/>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="1_7" label="0">
+
+        <setting id="num_bands_7" type="integer" label="30027">
+          <default>0</default>
+          <constraints>
+            <minimum label="30100">0</minimum>
+            <step>16</step>
+            <maximum>128</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30028</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="field_size_7" type="integer" label="30025">
+          <default>150</default>
+          <constraints>
+            <minimum label="30100">45</minimum>
+            <step>5</step>
+            <maximum>150</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="2_7" label="0">
+
+        <setting id="bar_width_7" type="integer" label="30036">
+          <default>20</default>
+          <constraints>
+            <minimum label="30100">20</minimum>
+            <step>5</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="smooth_anim_7" type="integer" label="30037">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30038">0</option>
+              <option label="30039">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="3_7" label="0">
+
+        <setting id="rotation_angle_7" type="integer" label="30017">
+          <default>180</default>
+          <constraints>
+            <minimum label="30019">-15</minimum>
+            <step>15</step>
+            <maximum>360</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30018</formatlabel>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_speed_7" type="integer" label="30026" help="0">
+          <default>-3</default>
+          <constraints>
+            <options>
+              <option label="30100">-4</option>
+              <option label="30042">-3</option>
+              <option label="30010">-2</option>
+              <option label="30011">-1</option>
+              <option label="30012">0</option>
+              <option label="30013">1</option>
+              <option label="30014">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_reverse_7" type="integer" label="30043">
+          <default>0</default>
+          <constraints>
+            <options>
+              <option label="30100">0</option>
+              <option label="30044">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_x_7" type="integer" label="30022">
+          <default>-5</default>
+          <constraints>
+            <minimum label="30100">-5</minimum>
+            <step>5</step>
+            <maximum>90</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30018</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="4_7" label="0">
+
+        <setting id="bar_height_7" type="integer" label="30004" help="0">
+          <default>4</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30032">4</option>
+              <option label="30005">0</option>
+              <option label="30006">1</option>
+              <option label="30007">2</option>
+              <option label="30008">3</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <!-- Bar heigth speed -->
+        <setting id="speed_7" type="integer" label="30009" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30010">0</option>
+              <option label="30011">1</option>
+              <option label="30012">2</option>
+              <option label="30013">3</option>
+              <option label="30014">4</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="color_mode_7" type="integer" label="30029" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30030">0</option>
+              <option label="30031">1</option>
+              <option label="30033">2</option>
+              <option label="30034">3</option>
+              <option label="30035">4</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="5_7" label="0">
+
+        <setting id="offset_y_7" type="integer" label="30023">
+          <default>-155</default>
+          <constraints>
+            <minimum label="30100">-155</minimum>
+            <step>5</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="db_range_7" type="integer" label="30020">
+          <default>21</default>
+          <constraints>
+            <minimum label="30100">21</minimum>
+            <step>3</step>
+            <maximum>144</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30021</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="6_7" label="0">
+
+        <setting id="mode_7" type="integer" label="30000" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30001">0</option>
+              <option label="30002">1</option>
+              <option label="30003">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="pointsize_7" type="integer" label="30015">
+          <default>0</default>
+          <constraints>
+            <minimum label="30100">0</minimum>
+            <step>1</step>
+            <maximum>50</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30016</formatlabel>
+          </control>
+          <dependencies>
+            <dependency type="enable">
+              <or>
+                <condition setting="mode_7">-1</condition>
+                <condition setting="mode_7">2</condition>
+              </or>
+            </dependency>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+    </category>
+    <category id="preset_8" label="30108" help="0">
+      <group id="0_8" label="0">
+
+        <setting id="name_8" type="string" label="30040">
+          <default>Matrix</default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string">
+            <heading>30040</heading>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="skip_preset_8" type="boolean" label="30041">
+          <default>false</default>
+          <control type="toggle"/>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="1_8" label="0">
+
+        <setting id="num_bands_8" type="integer" label="30027">
+          <default>0</default>
+          <constraints>
+            <minimum label="30100">0</minimum>
+            <step>16</step>
+            <maximum>128</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30028</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="field_size_8" type="integer" label="30025">
+          <default>45</default>
+          <constraints>
+            <minimum label="30100">45</minimum>
+            <step>5</step>
+            <maximum>150</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="2_8" label="0">
+
+        <setting id="bar_width_8" type="integer" label="30036">
+          <default>20</default>
+          <constraints>
+            <minimum label="30100">20</minimum>
+            <step>5</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="smooth_anim_8" type="integer" label="30037">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30038">0</option>
+              <option label="30039">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="3_8" label="0">
+
+        <setting id="rotation_angle_8" type="integer" label="30017">
+          <default>180</default>
+          <constraints>
+            <minimum label="30019">-15</minimum>
+            <step>15</step>
+            <maximum>360</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30018</formatlabel>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_speed_8" type="integer" label="30026" help="0">
+          <default>-3</default>
+          <constraints>
+            <options>
+              <option label="30100">-4</option>
+              <option label="30042">-3</option>
+              <option label="30010">-2</option>
+              <option label="30011">-1</option>
+              <option label="30012">0</option>
+              <option label="30013">1</option>
+              <option label="30014">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_reverse_8" type="integer" label="30043">
+          <default>0</default>
+          <constraints>
+            <options>
+              <option label="30100">0</option>
+              <option label="30044">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_x_8" type="integer" label="30022">
+          <default>90</default>
+          <constraints>
+            <minimum label="30100">-5</minimum>
+            <step>5</step>
+            <maximum>90</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30018</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="4_8" label="0">
+
+        <setting id="bar_height_8" type="integer" label="30004" help="0">
+          <default>4</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30032">4</option>
+              <option label="30005">0</option>
+              <option label="30006">1</option>
+              <option label="30007">2</option>
+              <option label="30008">3</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <!-- Bar heigth speed -->
+        <setting id="speed_8" type="integer" label="30009" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30010">0</option>
+              <option label="30011">1</option>
+              <option label="30012">2</option>
+              <option label="30013">3</option>
+              <option label="30014">4</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="color_mode_8" type="integer" label="30029" help="0">
+          <default>3</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30030">0</option>
+              <option label="30031">1</option>
+              <option label="30033">2</option>
+              <option label="30034">3</option>
+              <option label="30035">4</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="5_8" label="0">
+
+        <setting id="offset_y_8" type="integer" label="30023">
+          <default>-155</default>
+          <constraints>
+            <minimum label="30100">-155</minimum>
+            <step>5</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="db_range_8" type="integer" label="30020">
+          <default>21</default>
+          <constraints>
+            <minimum label="30100">21</minimum>
+            <step>3</step>
+            <maximum>144</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30021</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="6_8" label="0">
+
+        <setting id="mode_8" type="integer" label="30000" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30001">0</option>
+              <option label="30002">1</option>
+              <option label="30003">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="pointsize_8" type="integer" label="30015">
+          <default>0</default>
+          <constraints>
+            <minimum label="30100">0</minimum>
+            <step>1</step>
+            <maximum>50</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30016</formatlabel>
+          </control>
+          <dependencies>
+            <dependency type="enable">
+              <or>
+                <condition setting="mode_8">-1</condition>
+                <condition setting="mode_8">2</condition>
+              </or>
+            </dependency>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+    </category>
+    <category id="preset_9" label="30109" help="0">
+      <group id="0_9" label="0">
+
+        <setting id="name_9" type="string" label="30040">
+          <default>Trainspotting</default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string">
+            <heading>30040</heading>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="skip_preset_9" type="boolean" label="30041">
+          <default>false</default>
+          <control type="toggle"/>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="1_9" label="0">
+
+        <setting id="num_bands_9" type="integer" label="30027">
+          <default>0</default>
+          <constraints>
+            <minimum label="30100">0</minimum>
+            <step>16</step>
+            <maximum>128</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30028</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="field_size_9" type="integer" label="30025">
+          <default>45</default>
+          <constraints>
+            <minimum label="30100">45</minimum>
+            <step>5</step>
+            <maximum>150</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="2_9" label="0">
+
+        <setting id="bar_width_9" type="integer" label="30036">
+          <default>20</default>
+          <constraints>
+            <minimum label="30100">20</minimum>
+            <step>5</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="smooth_anim_9" type="integer" label="30037">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30038">0</option>
+              <option label="30039">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="3_9" label="0">
+
+        <setting id="rotation_angle_9" type="integer" label="30017">
+          <default>90</default>
+          <constraints>
+            <minimum label="30019">-15</minimum>
+            <step>15</step>
+            <maximum>360</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30018</formatlabel>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_speed_9" type="integer" label="30026" help="0">
+          <default>-3</default>
+          <constraints>
+            <options>
+              <option label="30100">-4</option>
+              <option label="30042">-3</option>
+              <option label="30010">-2</option>
+              <option label="30011">-1</option>
+              <option label="30012">0</option>
+              <option label="30013">1</option>
+              <option label="30014">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_reverse_9" type="integer" label="30043">
+          <default>0</default>
+          <constraints>
+            <options>
+              <option label="30100">0</option>
+              <option label="30044">1</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="rotation_x_9" type="integer" label="30022">
+          <default>90</default>
+          <constraints>
+            <minimum label="30100">-5</minimum>
+            <step>5</step>
+            <maximum>90</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30018</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="4_9" label="0">
+
+        <setting id="bar_height_9" type="integer" label="30004" help="0">
+          <default>4</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30032">4</option>
+              <option label="30005">0</option>
+              <option label="30006">1</option>
+              <option label="30007">2</option>
+              <option label="30008">3</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <!-- Bar heigth speed -->
+        <setting id="speed_9" type="integer" label="30009" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30010">0</option>
+              <option label="30011">1</option>
+              <option label="30012">2</option>
+              <option label="30013">3</option>
+              <option label="30014">4</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="color_mode_9" type="integer" label="30029" help="0">
+          <default>0</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30030">0</option>
+              <option label="30031">1</option>
+              <option label="30033">2</option>
+              <option label="30034">3</option>
+              <option label="30035">4</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="5_9" label="0">
+
+        <setting id="offset_y_9" type="integer" label="30023">
+          <default>-155</default>
+          <constraints>
+            <minimum label="30100">-155</minimum>
+            <step>5</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30024</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="db_range_9" type="integer" label="30020">
+          <default>21</default>
+          <constraints>
+            <minimum label="30100">21</minimum>
+            <step>3</step>
+            <maximum>144</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30021</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+      </group>
+      <group id="6_9" label="0">
+
+        <setting id="mode_9" type="integer" label="30000" help="0">
+          <default>-1</default>
+          <constraints>
+            <options>
+              <option label="30100">-1</option>
+              <option label="30001">0</option>
+              <option label="30002">1</option>
+              <option label="30003">2</option>
+            </options>
+          </constraints>
+          <control type="spinner" format="string" />
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
+        <setting id="pointsize_9" type="integer" label="30015">
+          <default>0</default>
+          <constraints>
+            <minimum label="30100">0</minimum>
+            <step>1</step>
+            <maximum>50</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>30016</formatlabel>
+          </control>
+          <dependencies>
+            <dependency type="enable">
+              <or>
+                <condition setting="mode_9">-1</condition>
+                <condition setting="mode_9">2</condition>
+              </or>
+            </dependency>
             <dependency type="visible">
               <or>
                 <condition on="property" name="IsDefined">HAS_GL</condition>

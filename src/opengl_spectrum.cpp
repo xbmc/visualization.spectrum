@@ -31,6 +31,7 @@
 #include <cstddef>
 #include <chrono>
 #include <mutex>
+#include <random>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -47,6 +48,20 @@
 
 #define NUM_BUFFER_ROWS 3 // assumed worst case: got three calls of AudioData, but non of Render
 #define RENDER_DURATIONS_SIZE 30 // half of a second if @ 60 fps
+
+#define NUM_PRESETS 9
+
+// Templete thresholds - Keep in sync with settings.xml !
+// minimum/option label=30100 | step   | name (basename) // member var
+#define MIN_NUM_BANDS  (    0 +   16) // num_bands          m_numBands
+#define MIN_W_SCALE    (   20 +    5) // bar_width          m_wScale
+#define MIN_X_ANGLE    (   -5 +    5) // rotation_x         m_xAngle
+#define MIN_Y_SPEED    (   -4 +    1) // rotation_speed     m_ySpeed
+#define MIN_Y_OFFSET   ( -155 +    5) // offset_y           m_yOffset
+#define MIN_FIELD_SIZE (   45 +    5) // field_size         m_fieldScale
+#define MIN_DB_RANGE   (   21 +    3) // db_range           m_dbRange
+#define MIN_POINT_SIZE (    0 +    1) // pointsize          m_pointSize
+//      MIN_OTHER      (   -1 +    1) // [other]            [other]
 
 enum {
   COLOR_LEGACY,
@@ -68,6 +83,16 @@ public:
   void Render() override;
   void AudioData(const float* audioData, size_t audioDataLength) override;
 
+  bool GetPresets(std::vector<std::string>& presets) override;
+  bool LoadPreset(int select) override;
+  bool PrevPreset() override;
+  bool NextPreset() override;
+  bool RandomPreset() override;
+  bool LockPreset(bool lockUnlock) override;
+  bool IsLocked() override;
+
+  int GetActivePreset() override;
+
   ADDON_STATUS Create() override;
   ADDON_STATUS SetSetting(const std::string& settingName, const kodi::addon::CSettingValue& settingValue) override;
 
@@ -76,6 +101,10 @@ public:
 
 private:
   void RenderBufferData();
+
+  std::string SettingNameExtension(int presetIndex);
+
+  std::mt19937 m_randomGenerator;
 
   std::mutex m_mutex;
 
@@ -90,12 +119,14 @@ private:
 
   bool m_glInitialized = false;
   bool m_hScaleIsFlat = false;
+  bool m_presetLocked = false;
   bool m_shadersLoaded = false;
   bool m_smoothAnim = false;
 
   int m_channels = 0;
   int m_colorMode = COLOR_STACKED;
   int m_dbRange = 48;
+  int m_presetIndex = 0;
   int m_samplesPerSec = 0;
 
   size_t m_freqDataLength = 0;
@@ -123,10 +154,9 @@ private:
   GLfloat m_yAngle = 45.0f;
   GLfloat m_zAngle = 0.0f;
 
-  GLfloat m_yFixedAngle = -15.0f;
   GLfloat m_yOffset = -0.25f;
   GLfloat m_yRenderOffset = 0.0f;
-
+  GLfloat m_yReverse = 1.0f;
   GLfloat m_ySpeed = 0.5f;
 
   GLenum m_drawMode = GL_TRIANGLES;
@@ -155,6 +185,12 @@ private:
 
 CVisualizationSpectrum::CVisualizationSpectrum()
 {
+  std::unique_lock<std::mutex> lock(m_mutex);
+
+  std::random_device rd;
+  std::mt19937 m_randomGenerator(rd()); // random seed
+
+  m_yAngle = kodi::addon::GetSettingInt("rotation_angle" + SettingNameExtension(-1), 45); // one time init from template
 }
 
 bool CVisualizationSpectrum::Start(int channels, int samplesPerSec, int bitsPerSample, const std::string& songName)
@@ -310,10 +346,7 @@ void CVisualizationSpectrum::Render()
 
   kodi::Log(ADDON_LOG_DEBUG, "%s: dar, par: %f %f", __func__, dar, par);
 
-  if (m_yFixedAngle < 0.0f)
-    m_yAngle = std::fmod(m_yAngle + m_ySpeed, 360.0f);
-  else
-    m_yAngle = m_yFixedAngle;
+  m_yAngle = std::fmod(m_yAngle + m_ySpeed * m_yReverse, 360.0f);
 
   m_projMat = glm::frustum(-1.0f, 1.0f, -1.0f / dar / par, 1.0f / dar / par, 1.5f, 10.0f);
 
@@ -544,7 +577,7 @@ void CVisualizationSpectrum::RenderBufferData()
       size_t i = (m_heightsRingBufBegin + m_numBands * y + x) % m_heights.size();
 
       GLfloat height = m_cHeights[i];
-      GLfloat heightTarget = m_heights[i];
+      GLfloat heightTarget = m_heights[i] * m_hScale;
       GLfloat heigthStep = m_hSpeed;
       if (m_renderDuration > 0.0f)
         heigthStep *= m_renderDuration * 60.0f; // take fps into account if other than 60
@@ -744,7 +777,7 @@ void CVisualizationSpectrum::AudioData(const float* pAudioData, size_t iAudioDat
       height = 0.0f;
 
     size_t i = (m_heightsRingBufBegin + x) % m_heights.size();
-    m_heights[i] = height * m_hScale;
+    m_heights[i] = height;
 
     prevXScale = xScale;
   }
@@ -766,6 +799,117 @@ void CVisualizationSpectrum::AudioData(const float* pAudioData, size_t iAudioDat
   }
 }
 
+std::string CVisualizationSpectrum::SettingNameExtension(int presetIndex)
+{
+  if (presetIndex == 0) // suppress _1 extension on legacy preset
+    return ("");
+  else
+    return ("_" + std::to_string(presetIndex + 1));
+}
+
+int CVisualizationSpectrum::GetActivePreset()
+{
+  return m_presetIndex;
+}
+
+bool CVisualizationSpectrum::GetPresets(std::vector<std::string>& presets)
+{
+  presets.clear();
+
+  for (int i = 0; i < NUM_PRESETS; i++)
+  {
+    std::string n = std::to_string(i + 1);
+
+    std::string ext = SettingNameExtension(i);
+
+    presets.push_back("#" + n + " " + kodi::addon::GetSettingString("name" + ext, ""));
+  }
+  return true;
+}
+
+bool CVisualizationSpectrum::LockPreset(bool lockUnlock)
+{
+  m_presetLocked = lockUnlock;
+  return true;
+}
+
+bool CVisualizationSpectrum::IsLocked()
+{
+  return(m_presetLocked);
+}
+
+bool CVisualizationSpectrum::LoadPreset(int select)
+{
+  kodi::Log(ADDON_LOG_DEBUG, "%s %d", __func__, select);
+
+  if (select < 0 || select > NUM_PRESETS - 1)
+    return false;
+
+  // Note: On change Kodi will do SetSetting callbacks
+  kodi::addon::SetSettingInt("active_preset", select);
+
+  return true;
+}
+
+bool CVisualizationSpectrum::PrevPreset()
+{
+  if (m_presetLocked)
+    return false;
+
+  int prev = m_presetIndex - 1 + NUM_PRESETS;
+
+  for (int i = prev; i > prev - NUM_PRESETS; i--)
+  {
+    std::string ext = SettingNameExtension(i % NUM_PRESETS);
+
+    if (!kodi::addon::GetSettingBoolean("skip_preset" + ext, false))
+      return LoadPreset(i % NUM_PRESETS);
+  }
+  return false;
+}
+
+bool CVisualizationSpectrum::NextPreset()
+{
+  if (m_presetLocked)
+    return false;
+
+  int next = m_presetIndex + 1;
+
+  for (int i = next; i < next + NUM_PRESETS; i++)
+  {
+    std::string ext = SettingNameExtension(i % NUM_PRESETS);
+
+    if (!kodi::addon::GetSettingBoolean("skip_preset" + ext, false))
+      return LoadPreset(i % NUM_PRESETS);
+  }
+  return false;
+}
+
+bool CVisualizationSpectrum::RandomPreset()
+{
+  if (m_presetLocked)
+    return false;
+
+  std::vector<int> presetIndexes;
+
+  for (int i = 0; i < NUM_PRESETS; i++)
+  {
+    if (i == m_presetIndex)
+      continue;
+
+    std::string ext = SettingNameExtension(i);
+
+    if (!kodi::addon::GetSettingBoolean("skip_preset" + ext, false))
+      presetIndexes.push_back(i);
+  }
+  if (presetIndexes.size() < 1)
+    return false;
+
+  std::uniform_int_distribution<>distrib(0, presetIndexes.size() - 1);
+
+  return LoadPreset(presetIndexes[distrib(m_randomGenerator)]);
+}
+
 ADDON_STATUS CVisualizationSpectrum::Create()
 {
   return ADDON_STATUS_NEED_SETTINGS;
@@ -778,186 +922,230 @@ ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName, 
 
   std::unique_lock<std::mutex> lock(m_mutex);
 
-  int value = settingValue.GetInt();
-
-  if (settingName == "bar_height")
+  for (int presetIndex : {-1, m_presetIndex}) // only match template and current preset
   {
-    m_hScale = 0.56f; // try to match avarage heights on former squeezed 1:1-frustum at least on 16:9 displays
-    m_hScaleIsFlat = false;
+    std::string ext = SettingNameExtension(presetIndex);
 
-    switch (value)
+    if (settingName == "name" + ext)
     {
-      case 0:
+      // just help to debug
+      kodi::Log(ADDON_LOG_DEBUG, "%s: %s: %s", __func__, settingName.c_str(), settingValue.GetString().c_str());
+      return ADDON_STATUS_OK;
+    }
+
+    int value = settingValue.GetInt();
+
+    if (settingName == "active_preset")
+    {
+      m_presetIndex = value;
+    }
+    else if (settingName == "bar_height" + ext && value >= 0)
+    {
+      m_hScale = 0.56f; // try to match avarage heights on former squeezed 1:1-frustum at least on 16:9 displays
+      m_hScaleIsFlat = false;
+
+      switch (value)
       {
-        m_hScale *= 0.5f; // small
-        break;
-      }
-      case 1:
-      default:
-      {
-        m_hScale *= 1.0f; // default
-        break;
-      }
-      case 2:
-      {
-        m_hScale *= 2.0f; // big
-        break;
-      }
-      case 3:
-      {
-        m_hScale *= 3.0f; // very big
-        break;
-      }
-      case 4:
-      {
-        m_hScale *= 0.125f; // very small (used for heights animation)
-        m_hScaleIsFlat = true; // flat
-        break;
+        case 0:
+        {
+          m_hScale *= 0.5f; // small
+          break;
+        }
+        case 1:
+        default:
+        {
+          m_hScale *= 1.0f; // default
+          break;
+        }
+        case 2:
+        {
+          m_hScale *= 2.0f; // big
+          break;
+        }
+        case 3:
+        {
+          m_hScale *= 3.0f; // very big
+          break;
+        }
+        case 4:
+        {
+          m_hScale *= 0.125f; // very small (used for heights animation)
+          m_hScaleIsFlat = true; // flat
+          break;
+        }
       }
     }
-  }
-  else if (settingName == "bar_width")
-  {
-    m_wScale = value / 100.0f;
-  }
-  else if (settingName == "color_mode")
-  {
-    m_colorMode = COLOR_MONOCHROME;
-
-    switch (value)
+    else if (settingName == "bar_width" + ext && value >= MIN_W_SCALE)
     {
-      case 0: // legacy mode
-      {
-        m_colorMode = COLOR_LEGACY;
-        break;
-      }
-      case 1: // stack green->red bar on top of blue->green base bar
-      default:
-      {
-        m_colorMode = COLOR_STACKED;
+      m_wScale = value / 100.0f;
+    }
+    else if (settingName == "color_mode" + ext && value >= 0)
+    {
+      m_colorMode = COLOR_MONOCHROME;
 
-        m_topColor = {0.0f, 0.8f, 0.0f}; // darker green
-        m_bottomColor = {0.0f, 0.0f, 1.0f}; // blue
-        break;
-      }
-      case 2:
+      switch (value)
       {
-        m_topColor = {1.0f, 0.8f, 0.0f}; // amber
-        break;
+        case 0: // legacy mode
+        {
+          m_colorMode = COLOR_LEGACY;
+          break;
+        }
+        case 1: // stack green->red bar on top of blue->green base bar
+        default:
+        {
+          m_colorMode = COLOR_STACKED;
+
+          m_topColor = {0.0f, 0.8f, 0.0f}; // darker green
+          m_bottomColor = {0.0f, 0.0f, 1.0f}; // blue
+          break;
+        }
+        case 2:
+        {
+          m_topColor = {1.0f, 0.8f, 0.0f}; // amber
+          break;
+        }
+        case 3:
+        {
+          m_topColor = {0.0f, 0.0f, 1.0f}; // blue
+          break;
+        }
+        case 4:
+        {
+          m_topColor = {0.0f, 1.0f, 0.0f}; // green
+          break;
+        }
       }
-      case 3:
+      if (m_colorMode == COLOR_MONOCHROME)
+        m_bottomColor = m_topColor * 0.05f;
+    }
+    else if (settingName == "db_range" + ext && value >= MIN_DB_RANGE)
+    {
+      if (value < 1)
+        m_dbRange = 48;
+      else
+        m_dbRange = value;
+    }
+    else if (settingName == "field_size" + ext && value >= MIN_FIELD_SIZE)
+    {
+      m_fieldScale = value / 100.0f * 3.0f;
+    }
+    else if (settingName == "mode" + ext && value >= 0)
+    {
+      switch (value)
       {
-        m_topColor = {0.0f, 0.0f, 1.0f}; // blue
-        break;
-      }
-      case 4:
-      {
-        m_topColor = {0.0f, 1.0f, 0.0f}; // green
-        break;
+        case 0:
+        default:
+        {
+          m_drawMode = GL_TRIANGLES;
+          break;
+        }
+        case 1:
+        {
+          m_drawMode = GL_LINES;
+          break;
+        }
+        case 2:
+        {
+          m_drawMode = GL_POINTS;
+          break;
+        }
       }
     }
-    if (m_colorMode == COLOR_MONOCHROME)
-      m_bottomColor = m_topColor * 0.05f;
-  }
-  else if (settingName == "db_range")
-  {
-    if (value < 1)
-      m_dbRange = 48;
+    else if (settingName == "num_bands" + ext && value >= MIN_NUM_BANDS)
+    {
+      if (value < 2) // lone bar not supported
+        m_numBands = 2;
+      else
+        m_numBands = value;
+    }
+    else if (settingName == "offset_y" + ext && value >= MIN_Y_OFFSET)
+    {
+      m_yOffset = value / 100.0f;
+    }
+    else if (settingName == "pointsize" + ext && value >= MIN_POINT_SIZE)
+    {
+      m_pointSize = value;
+    }
+    else if (settingName == "rotation_angle" + ext && value >= 0 && presetIndex >= 0)
+    {
+      m_yAngle = value; // override
+    }
+    else if (settingName == "rotation_reverse" + ext)
+    {
+      if (presetIndex == -1)
+        m_yReverse = 1.0f; // init
+      if (value == 1)
+        m_yReverse *= -1.0f; // invert
+    }
+    else if (settingName == "rotation_speed" + ext && value >= MIN_Y_SPEED)
+    {
+      if (value == -3) // zero
+        m_ySpeed = 0.0f;
+      else
+        m_ySpeed = powf(2.0f, value) * 0.5f;
+    }
+    else if (settingName == "rotation_x" + ext && value >= MIN_X_ANGLE)
+    {
+      m_xAngle = value;
+    }
+    else if (settingName == "smooth_anim" + ext && value >= 0)
+    {
+      switch (value)
+      {
+        case 0:
+        {
+          m_smoothAnim = false;
+          break;
+        }
+        case 1:
+        default:
+        {
+          m_smoothAnim = true;
+          break;
+        }
+      }
+    }
+    else if (settingName == "speed" + ext && value >= 0)
+    {
+      switch (value)
+      {
+        case 0:
+        {
+          m_hSpeed = 0.0125f; // very slow
+          break;
+        }
+        case 1:
+        {
+          m_hSpeed = 0.025f; // slow
+          break;
+        }
+        case 2:
+        default:
+        {
+          m_hSpeed = 0.05f; // default
+          break;
+        }
+        case 3:
+        {
+          m_hSpeed = 0.1f; // fast
+          break;
+        }
+        case 4:
+        {
+          m_hSpeed = 0.0f; // very fast (no delay)
+          break;
+        }
+      }
+    }
     else
-      m_dbRange = value;
-  }
-  else if (settingName == "field_size")
-  {
-    m_fieldScale = value / 100.0f * 3.0f;
-  }
-  else if (settingName == "mode")
-  {
-    switch (value)
-    {
-      case 0:
-      default:
-      {
-        m_drawMode = GL_TRIANGLES;
-        break;
-      }
-      case 1:
-      {
-        m_drawMode = GL_LINES;
-        break;
-      }
-      case 2:
-      {
-        m_drawMode = GL_POINTS;
-        break;
-      }
-    }
-  }
-  else if (settingName == "num_bands")
-  {
-    if (value < 2) // lone bar not supported
-      m_numBands = 2;
-    else
-      m_numBands = value;
-  }
-  else if (settingName == "offset_y")
-  {
-    m_yOffset = value / 100.0f;
-  }
-  else if (settingName == "pointsize")
-  {
-    m_pointSize = value;
-  }
-  else if (settingName == "rotation_angle")
-  {
-    m_yFixedAngle = value;
-  }
-  else if (settingName == "rotation_speed")
-  {
-    m_ySpeed = powf(2.0f, value) * 0.5f;
-  }
-  else if (settingName == "rotation_x")
-  {
-    m_xAngle = value;
-  }
-  else if (settingName == "smooth_anim")
-  {
-    m_smoothAnim = value;
-  }
-  else if (settingName == "speed")
-  {
-    switch (value)
-    {
-      case 0:
-      {
-        m_hSpeed = 0.0125f; // very slow
-        break;
-      }
-      case 1:
-      {
-        m_hSpeed = 0.025f; // slow
-        break;
-      }
-      case 2:
-      default:
-      {
-        m_hSpeed = 0.05f; // default
-        break;
-      }
-      case 3:
-      {
-        m_hSpeed = 0.1f; // fast
-        break;
-      }
-      case 4:
-      {
-        m_hSpeed = 0.0f; // very fast (no delay)
-        break;
-      }
-    }
-  }
-  else
-    return ADDON_STATUS_UNKNOWN;
+      continue;
 
+    kodi::Log(ADDON_LOG_DEBUG, "%s: %s: %d", __func__, settingName.c_str(), settingValue.GetInt());
+
+    return ADDON_STATUS_OK;
+  }
+
+  // If no match, ignore setting
   return ADDON_STATUS_OK;
 }
 
