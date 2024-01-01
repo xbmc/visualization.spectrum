@@ -414,7 +414,7 @@ void CVisualizationSpectrum::draw_bars(void)
     for(x = 0; x < NUM_BANDS; x++)
     {
       x_offset = -1.6 + ((float)x * 0.2);
-      if (std::fabs(m_cHeights[y][x] - m_heights[y][x]) > m_hSpeed)
+      if (m_hSpeed > 0.0f && std::fabs(m_cHeights[y][x] - m_heights[y][x]) > m_hSpeed)
       {
         if (m_cHeights[y][x] < m_heights[y][x])
           m_cHeights[y][x] += m_hSpeed;
@@ -570,7 +570,7 @@ ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName, 
       }
       case 4:
       {
-        m_hSpeed = 0.2f; // unused
+        m_hSpeed = 0.0f; // very fast (no delay)
         break;
       }
     }
