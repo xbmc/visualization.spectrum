@@ -64,8 +64,9 @@ public:
   bool OnEnabled() override;
 
 private:
-  void draw_bars(void);
-  void draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue);
+  void AddBar(GLfloat xMid, GLfloat zMid, GLfloat height, GLfloat red, GLfloat green, GLfloat blue);
+  void AddQuad(glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 d, glm::vec3 color);
+  void RenderBufferData();
 
   std::unique_ptr<KFFTR> m_transform;
   std::unique_ptr<float[]> m_freqData;
@@ -123,9 +124,6 @@ private:
 
 CVisualizationSpectrum::CVisualizationSpectrum()
 {
-  m_vertexBufferData.resize(48);
-  m_colorBufferData.resize(48);
-
   for (int x = 0; x < NUM_BANDS; x++)
   {
     m_xScales[x] = 0;
@@ -195,6 +193,8 @@ void CVisualizationSpectrum::Render()
   if (!m_glInitialized)
     return;
 
+  RenderBufferData();
+
 #ifdef HAS_GL
   glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO[0]);
   glVertexAttribPointer(m_hPos, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, nullptr);
@@ -220,6 +220,10 @@ void CVisualizationSpectrum::Render()
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
 
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
+  glFrontFace(GL_CCW);
+
   // Clear the screen
   glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -233,14 +237,24 @@ void CVisualizationSpectrum::Render()
   m_modelMat = glm::rotate(m_modelMat, glm::radians(m_yAngle), glm::vec3(0.0f, 1.0f, 0.0f));
   m_modelMat = glm::rotate(m_modelMat, glm::radians(m_zAngle), glm::vec3(0.0f, 0.0f, 1.0f));
 
+#ifdef HAS_GL
+  glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO[0]);
+  glBufferData(GL_ARRAY_BUFFER, m_vertexBufferData.size() * sizeof(glm::vec3), &m_vertexBufferData[0], GL_STATIC_DRAW);
+
+  glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO[1]);
+  glBufferData(GL_ARRAY_BUFFER, m_colorBufferData.size() * sizeof(glm::vec3), &m_colorBufferData[0], GL_STATIC_DRAW);
+#endif
+
   EnableShader();
 
-  draw_bars();
+  glDrawArrays(m_drawMode, 0, m_vertexBufferData.size());
 
   DisableShader();
 
   glDisableVertexAttribArray(m_hPos);
   glDisableVertexAttribArray(m_hCol);
+
+  glDisable(GL_CULL_FACE);
 
   glDisable(GL_DEPTH_TEST);
 #ifdef HAS_GL
@@ -273,72 +287,37 @@ bool CVisualizationSpectrum::OnEnabled()
   return true;
 }
 
-void CVisualizationSpectrum::draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue )
+void CVisualizationSpectrum::AddQuad(glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 d, glm::vec3 color)
 {
-  GLfloat width = 0.1f;
-  m_vertexBufferData =
+  m_vertexBufferData.insert(m_vertexBufferData.end(),
   {
-    // Bottom
-    { x_offset + width, 0.0f,   z_offset + width },
-    { x_offset,         0.0f,   z_offset },
-    { x_offset + width, 0.0f,   z_offset },
-    { x_offset + width, 0.0f,   z_offset + width },
-    { x_offset,         0.0f,   z_offset + width },
-    { x_offset,         0.0f,   z_offset },
+    a, b, // line-mode: 1st line
+    c, c,
+    d, a, // line-mode: 2nd line
+  });
+  m_colorBufferData.insert(m_colorBufferData.end(), 6, color);
+}
 
-    { x_offset,         0.0f,   z_offset + width },
-    { x_offset + width, 0.0f,   z_offset },
-    { x_offset + width, 0.0f,   z_offset + width },
-    { x_offset,         0.0f,   z_offset + width },
-    { x_offset + width, 0.0f,   z_offset },
-    { x_offset,         0.0f,   z_offset },
+void CVisualizationSpectrum::AddBar(GLfloat xMid, GLfloat zMid, GLfloat height, GLfloat red, GLfloat green, GLfloat blue)
+{
+  GLfloat wHalf = 0.1f * 0.5f;
 
-    // Side
-    { x_offset,         0.0f,   z_offset },
-    { x_offset,         0.0f,   z_offset + width },
-    { x_offset,         height, z_offset + width },
-    { x_offset,         0.0f,   z_offset },
-    { x_offset,         height, z_offset + width },
-    { x_offset,         height, z_offset },
+  GLfloat lft = xMid - wHalf;
+  GLfloat rgt = xMid + wHalf;
 
-    { x_offset + width, height, z_offset },
-    { x_offset,         0.0f,   z_offset },
-    { x_offset,         height, z_offset },
-    { x_offset + width, height, z_offset },
-    { x_offset + width, 0.0f,   z_offset },
-    { x_offset,         0.0f,   z_offset },
+  GLfloat bck = zMid - wHalf;
+  GLfloat fnt = zMid + wHalf;
 
-    { x_offset,         height, z_offset + width },
-    { x_offset,         0.0f,   z_offset + width },
-    { x_offset + width, 0.0f,   z_offset + width },
-    { x_offset + width, height, z_offset + width },
-    { x_offset,         height, z_offset + width },
-    { x_offset + width, 0.0f,   z_offset + width },
+  GLfloat top = height;
+  GLfloat btm = 0.0f;
 
-    { x_offset + width, height, z_offset + width },
-    { x_offset + width, 0.0f,   z_offset },
-    { x_offset + width, height, z_offset },
-    { x_offset + width, 0.0f,   z_offset },
-    { x_offset + width, height, z_offset + width },
-    { x_offset + width, 0.0f,   z_offset + width },
+  glm::vec3 color = {red, green, blue};
 
-    // Top
-    { x_offset + width, height, z_offset + width },
-    { x_offset + width, height, z_offset },
-    { x_offset,         height, z_offset },
-    { x_offset + width, height, z_offset + width },
-    { x_offset,         height, z_offset },
-    { x_offset,         height, z_offset + width },
+  GLfloat sideMlpy1 = 1.0f;
+  GLfloat sideMlpy2 = 1.0f;
+  GLfloat sideMlpy3 = 1.0f;
+  GLfloat sideMlpy4 = 1.0f;
 
-    { x_offset,         height, z_offset + width },
-    { x_offset + width, height, z_offset },
-    { x_offset,         height, z_offset },
-    { x_offset + width, height, z_offset },
-    { x_offset + width, height, z_offset + width },
-    { x_offset,         height, z_offset + width }
-  };
-
-  float sideMlpy1, sideMlpy2, sideMlpy3, sideMlpy4;
   if (m_drawMode == GL_TRIANGLES)
   {
     sideMlpy1 = 0.5f;
@@ -346,98 +325,52 @@ void CVisualizationSpectrum::draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloa
     sideMlpy3 = 0.75f;
     sideMlpy4 = 0.5f;
   }
-  else
-  {
-    sideMlpy1 = sideMlpy2 = sideMlpy3 = sideMlpy4 = 1.0f;
-  }
 
-  // One color for each vertex. They were generated randomly.
-  m_colorBufferData =
-  {
-    // Bottom
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
+  // notes:
+  // Vertices must be in counter-clock-wise order for face-culling.
+  // For lines-mode, only 1st <-> 2nd and 1st <-> last vertex are used.
+  // Therefore the 1st vertices are choosen so that all 12 edges are drawn.
 
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-
-    // Side
-    { red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1 },
-    { red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1 },
-    { red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1 },
-    { red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1 },
-    { red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1 },
-    { red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1 },
-
-    { red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2 },
-    { red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2 },
-    { red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2 },
-    { red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2 },
-    { red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2 },
-    { red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2 },
-
-    { red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3 },
-    { red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3 },
-    { red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3 },
-    { red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3 },
-    { red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3 },
-    { red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3 },
-
-    { red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4 },
-    { red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4 },
-    { red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4 },
-    { red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4 },
-    { red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4 },
-    { red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4 },
-
-    // Top
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-  };
-
-#ifdef HAS_GL
-  glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO[0]);
-  glBufferData(GL_ARRAY_BUFFER, m_vertexBufferData.size()*sizeof(glm::vec3), &m_vertexBufferData[0], GL_STATIC_DRAW);
-  glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO[1]);
-  glBufferData(GL_ARRAY_BUFFER, m_colorBufferData.size()*sizeof(glm::vec3), &m_colorBufferData[0], GL_STATIC_DRAW);
-#endif
-  glDrawArrays(m_drawMode, 0, m_vertexBufferData.size()); /* 12*3 indices starting at 0 -> 12 triangles + 4*3 to have on lines show correct */
+  // Bottom
+  AddQuad({rgt, btm, fnt}, {lft, btm, fnt}, {lft, btm, bck}, {rgt, btm, bck}, color);
+  // Left side
+  AddQuad({lft, btm, fnt}, {lft, top, fnt}, {lft, top, bck}, {lft, btm, bck}, color * sideMlpy1);
+  // Back
+  AddQuad({lft, btm, bck}, {lft, top, bck}, {rgt, top, bck}, {rgt, btm, bck}, color * sideMlpy2);
+  // Front
+  AddQuad({rgt, top, fnt}, {lft, top, fnt}, {lft, btm, fnt}, {rgt, btm, fnt}, color * sideMlpy3);
+  // Right side
+  AddQuad({rgt, top, bck}, {rgt, top, fnt}, {rgt, btm, fnt}, {rgt, btm, bck}, color * sideMlpy4);
+  // Top
+  AddQuad({lft, top, bck}, {lft, top, fnt}, {rgt, top, fnt}, {rgt, top, bck}, color);
 }
 
-void CVisualizationSpectrum::draw_bars(void)
+void CVisualizationSpectrum::RenderBufferData()
 {
-  int x, y;
-  GLfloat x_offset, z_offset, r_base, b_base;
+  m_colorBufferData.clear();
+  m_vertexBufferData.clear();
 
-  for(y = 0; y < NUM_BANDS; y++)
+  // Pre-allocate gl buffer memory
+  size_t glBufferDataCapacity = NUM_BANDS * NUM_BANDS * 6 * 2 * 3; // 6 quads
+  if (m_colorBufferData.capacity() < glBufferDataCapacity)
+    m_colorBufferData.reserve(glBufferDataCapacity);
+  if (m_vertexBufferData.capacity() < glBufferDataCapacity)
+    m_vertexBufferData.reserve(glBufferDataCapacity);
+
+  for (size_t y = 0; y < NUM_BANDS; y++)
   {
-    z_offset = -1.6 + ((15 - y) * 0.2);
+    GLfloat zMid = 3.0f * (0.5f - y / (NUM_BANDS - 1.0f));
 
-    b_base = y * (1.0 / 15);
-    r_base = 1.0 - b_base;
+    GLfloat blue = y / (NUM_BANDS - 1.0f);
 
-    for(x = 0; x < NUM_BANDS; x++)
+    for (size_t x = 0; x < NUM_BANDS; x++)
     {
-      x_offset = -1.6 + ((float)x * 0.2);
+      GLfloat xMid = 3.0f * (-0.5f + x / (NUM_BANDS - 1.0f));
+
+      GLfloat green = x / (NUM_BANDS - 1.0f);
+
+      GLfloat red = (1.0f - blue) * (1.0f - green);
+
       if (m_hSpeed > 0.0f && std::fabs(m_cHeights[y][x] - m_heights[y][x]) > m_hSpeed)
       {
         if (m_cHeights[y][x] < m_heights[y][x])
@@ -446,11 +379,9 @@ void CVisualizationSpectrum::draw_bars(void)
           m_cHeights[y][x] -= m_hSpeed;
       }
       else
-      {
         m_cHeights[y][x] = m_heights[y][x];
-      }
 
-      draw_bar(x_offset, z_offset, m_cHeights[y][x], r_base - (float(x) * (r_base / 15.0)), (float)x * (1.0 / 15), b_base);
+      AddBar(xMid, zMid, m_cHeights[y][x], red, green, blue);
     }
   }
 }
