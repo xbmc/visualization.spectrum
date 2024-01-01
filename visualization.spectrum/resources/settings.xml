@@ -2,6 +2,7 @@
   <section id="addon" label="0" help="0">
     <category id="main" label="128" help="0">
       <group id="1" label="0">
+
         <setting id="mode" type="integer" label="30000" help="0">
           <default>0</default>
           <constraints>
@@ -13,6 +14,7 @@
           </constraints>
           <control type="spinner" format="string" />
         </setting>
+
         <setting id="pointsize" type="integer" label="30015">
           <default>3</default>
           <constraints>
@@ -33,6 +35,7 @@
             </dependency>
           </dependencies>
         </setting>
+
         <setting id="bar_height" type="integer" label="30004" help="0">
           <default>1</default>
           <constraints>
@@ -45,6 +48,8 @@
           </constraints>
           <control type="spinner" format="string" />
         </setting>
+
+        <!-- Bar heigth speed -->
         <setting id="speed" type="integer" label="30009" help="0">
           <default>2</default>
           <constraints>
@@ -57,6 +62,7 @@
           </constraints>
           <control type="spinner" format="string" />
         </setting>
+
         <setting id="rotation_angle" type="integer" label="30017">
           <default>-15</default>
           <constraints>
@@ -68,6 +74,7 @@
             <formatlabel>30018</formatlabel>
           </control>
         </setting>
+
       </group>
     </category>
   </section>

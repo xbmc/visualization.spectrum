@@ -21,7 +21,7 @@ msgid "Visualisation showing a rotating 3D Spectrum Analyzer"
 msgstr ""
 
 msgctxt "Addon Description"
-msgid "Spectrum is a Visualisation showing a rotating 3D Spectrum Analyzer rendered in  that moves to the beat of the music creating a wave effect across the spectrum grid.[CR]It also has settings to adjust the spectrum bar height, Its speed, and how the bars are rendered (solid, points, wire frame) and is a nice light weight, low cpu useage visualisation that looks great"
+msgid "Spectrum is a Visualisation showing a rotating 3D Spectrum Analyzer rendered in that moves to the beat of the music creating a wave effect across the spectrum grid.[CR]It also has settings to adjust the spectrum bar height, Its speed, and how the bars are rendered (solid, points, wire frame) and is a nice light weight, low cpu useage visualisation that looks great."
 msgstr ""
 
 #settings labels
@@ -43,7 +43,7 @@ msgid "Points"
 msgstr ""
 
 msgctxt "#30004"
-msgid "Bar Height"
+msgid "Bar height"
 msgstr ""
 
 msgctxt "#30005"
@@ -59,15 +59,15 @@ msgid "Big"
 msgstr ""
 
 msgctxt "#30008"
-msgid "Very Big"
+msgid "Very big"
 msgstr ""
 
 msgctxt "#30009"
-msgid "Speed"
+msgid "Bar height speed"
 msgstr ""
 
 msgctxt "#30010"
-msgid "Very Slow"
+msgid "Very slow"
 msgstr ""
 
 msgctxt "#30011"
@@ -83,7 +83,7 @@ msgid "Fast"
 msgstr ""
 
 msgctxt "#30014"
-msgid "Very Fast"
+msgid "Very fast"
 msgstr ""
 
 msgctxt "#30015"
