@@ -105,3 +105,12 @@ msgstr ""
 msgctxt "#30019"
 msgid "Turn continuously"
 msgstr ""
+
+msgctxt "#30020"
+msgid "Dynamic range"
+msgstr ""
+
+msgctxt "#30021"
+msgid "{0:d} dB"
+msgstr ""
+

@@ -76,6 +76,27 @@
           </control>
         </setting>
 
+        <setting id="db_range" type="integer" label="30020">
+          <default>48</default>
+          <constraints>
+            <minimum>24</minimum>
+            <step>3</step>
+            <maximum>144</maximum>
+          </constraints>
+          <control type="slider" format="integer">
+            <formatlabel>30021</formatlabel>
+            <popup>false</popup>
+          </control>
+          <dependencies>
+            <dependency type="visible">
+              <or>
+                <condition on="property" name="IsDefined">HAS_GL</condition>
+                <condition on="property" name="IsDefined">HAS_GLES</condition>
+              </or>
+            </dependency>
+          </dependencies>
+        </setting>
+
       </group>
     </category>
   </section>

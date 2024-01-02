@@ -33,11 +33,15 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "kfftr.h"
+
 #ifndef M_PI
 #define M_PI 3.141592654f
 #endif
 
 #define NUM_BANDS 16
+
+#define MIN_FREQS_PER_BAR 2 // use at least two freqs per bar
 
 class ATTR_DLL_LOCAL CVisualizationSpectrum
   : public kodi::addon::CAddonBase,
@@ -63,13 +67,27 @@ private:
   void draw_bars(void);
   void draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue);
 
+  std::unique_ptr<KFFTR> m_transform;
+  std::unique_ptr<float[]> m_freqData;
+
   bool m_glInitialized = false;
   bool m_shadersLoaded = false;
 
+  int m_channels = 0;
+  int m_dbRange = 48;
+
+  size_t m_freqDataLength = 0;
+  size_t m_prevFreqDataLength = 0;
+
+  size_t m_samples = 0;
+
+  size_t m_xScales[NUM_BANDS];
+
+  GLfloat m_hScales[NUM_BANDS];
   GLfloat m_heights[NUM_BANDS][NUM_BANDS];
   GLfloat m_cHeights[NUM_BANDS][NUM_BANDS];
 
-  GLfloat m_hScale = 1.0 / log(256.0);
+  GLfloat m_hScale = 1.0f;
   GLfloat m_hSpeed = 0.05f;
 
   GLfloat m_pointSize = 0.0f;
@@ -107,11 +125,17 @@ CVisualizationSpectrum::CVisualizationSpectrum()
 {
   m_vertexBufferData.resize(48);
   m_colorBufferData.resize(48);
+
+  for (int x = 0; x < NUM_BANDS; x++)
+  {
+    m_xScales[x] = 0;
+    m_hScales[x] = 0.0;
+  }
 }
 
 bool CVisualizationSpectrum::Start(int channels, int samplesPerSec, int bitsPerSample, const std::string& songName)
 {
-  (void)channels;
+  m_channels = channels;
   (void)samplesPerSec;
   (void)bitsPerSample;
   (void)songName;
@@ -433,38 +457,104 @@ void CVisualizationSpectrum::draw_bars(void)
 
 void CVisualizationSpectrum::AudioData(const float* pAudioData, size_t iAudioDataLength)
 {
-  int i,c;
-  int y=0;
-  GLfloat val;
+  m_samples = 0;
 
-  int xscale[] = {0, 1, 2, 3, 5, 7, 10, 14, 20, 28, 40, 54, 74, 101, 137, 187, 255};
+  if (m_channels < 1)
+    return;
 
-  for(y = NUM_BANDS - 1; y > 0; y--)
+  m_samples = iAudioDataLength / m_channels;
+
+  size_t freqDataLength = m_samples / 2;
+
+  if (freqDataLength < 1)
+    return;
+
+  // Update scale arrays
+  if (m_prevFreqDataLength != freqDataLength)
   {
-    for(i = 0; i < NUM_BANDS; i++)
+    size_t slope = MIN_FREQS_PER_BAR;
+    size_t slopeAmount = slope * NUM_BANDS;
+
+    size_t prevXScale = 0;
+    for (size_t x = 0; x < NUM_BANDS; x++)
     {
-      m_heights[y][i] = m_heights[y - 1][i];
+      size_t xScale = slope * (x + 1);
+
+      if (freqDataLength > slopeAmount)
+        xScale += powf(2.0 * (freqDataLength - slopeAmount), (x + 1.0) / NUM_BANDS) * 0.5;
+
+      if (xScale > freqDataLength)
+        xScale = freqDataLength;
+
+      size_t lowFreq = prevXScale + 1;
+      size_t highFreq = xScale;
+
+      // Calculate bars per octave = 1 / octaves
+      m_hScales[x] = 1.0 / log2((highFreq + 0.5) / (lowFreq - 0.5));
+
+      m_xScales[x] = xScale;
+      prevXScale = xScale;
     }
   }
 
-  for(i = 0; i < NUM_BANDS; i++)
+  // Update KFFTR
+  if (m_prevFreqDataLength != freqDataLength || !m_transform)
   {
-    for(c = xscale[i], y = 0; c < xscale[i + 1]; c++)
+    if (freqDataLength > m_freqDataLength || !m_freqData)
     {
-      if (c<iAudioDataLength)
-      {
-        if((int)(pAudioData[c] * (INT16_MAX)) > y)
-          y = (int)(pAudioData[c] * (INT16_MAX));
-      }
-      else
-        continue;
+      m_freqData.reset(new float[freqDataLength]);
+      m_freqDataLength = freqDataLength;
     }
-    y >>= 7;
-    if(y > 0)
-      val = (logf(y) * m_hScale);
-    else
-      val = 0;
-    m_heights[0][i] = val;
+
+    m_transform.reset(new KFFTR(freqDataLength * 2, m_channels, true));
+    m_prevFreqDataLength = freqDataLength;
+  }
+
+  // FFT
+  m_transform->calc(pAudioData, m_freqData);
+
+  // Shift backwards by one row
+  for (int x = 0; x < NUM_BANDS; x++)
+  {
+
+    for (int y = NUM_BANDS - 1; y > 0; y--)
+    {
+      m_heights[y][x] = m_heights[y - 1][x];
+      m_cHeights[y][x] = m_cHeights[y - 1][x];
+    }
+  }
+
+  // Make new heights front row
+  size_t prevXScale = 0;
+  for (size_t x = 0; x < NUM_BANDS; x++)
+  {
+    size_t xScale = m_xScales[x];
+    GLfloat power = 0.0f;
+
+    // Add up the resulting output power factor avarage over time for the sine waves sum of band
+    // In other words: Calculate the square of the root mean square (RMS) value
+    // avg( (sin(f1)*a + sin(f2)*b + sin(f3)*c + ... )^2 ) = 0.5 * ( a^2 + b^2 + c^2 + ... )
+    //  where
+    //   a,b,c,... are the amplitudes aka FreqData magnitudes,
+    //   0.5 is the avg of arbitrary sin(f[i])*sin(f[i]) and
+    //   0.0 is the avg of arbitrary sin(f[i])*sin(f[j]) nullifying a*b and friends
+    for (size_t i = prevXScale; i < xScale && i < freqDataLength; i++)
+      power += m_freqData[i] * m_freqData[i];
+    power *= 0.5f;
+
+    // Multiply with bands per octave to get power per octave (equalize pink noise)
+    power *= m_hScales[x];
+
+    // Calculate bar height
+    GLfloat height = 0.0f;
+    if (power > 0.0f && m_dbRange > 0)
+      height = 10.0f * log10f(power) / m_dbRange + 1.0f;
+    if (height < 0.0f)
+      height = 0.0f;
+
+    m_heights[0][x] = height * m_hScale;
+
+    prevXScale = xScale;
   }
 }
 
@@ -511,7 +601,13 @@ ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName, 
         break;
       }
     }
-    m_hScale /= log(256.0f);
+  }
+  else if (settingName == "db_range")
+  {
+    if (value < 1)
+      m_dbRange = 48;
+    else
+      m_dbRange = value;
   }
   else if (settingName == "mode")
   {

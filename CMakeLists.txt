@@ -47,9 +47,17 @@ else()
     add_definitions(${OPENGLES_DEFINITIONS})
   endif()
 
-  set(SPECTRUM_SOURCES src/opengl_spectrum.cpp)
+  set(SPECTRUM_SOURCES src/opengl_spectrum.cpp
+                       src/kfftr.cpp)
 
-  include_directories(${GLM_INCLUDE_DIR})
+  set(SPECTRUM_HEADERS src/kfftr.h)
+
+  list(APPEND DEPLIBS kissfft)
+
+  include_directories(${GLM_INCLUDE_DIR}
+                      ${PROJECT_SOURCE_DIR}/lib/kissfft)
+
+  add_subdirectory(${PROJECT_SOURCE_DIR}/lib/kissfft)
 endif()
 
 message(STATUS "Configured render system: ${APP_RENDER_SYSTEM}")
