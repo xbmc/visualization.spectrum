@@ -88,16 +88,19 @@ private:
   GLfloat m_heights[NUM_BANDS][NUM_BANDS];
   GLfloat m_cHeights[NUM_BANDS][NUM_BANDS];
 
+  GLfloat m_fieldScale = 3.0f;
+
   GLfloat m_hScale = 1.0f;
   GLfloat m_hSpeed = 0.05f;
 
   GLfloat m_pointSize = 0.0f;
 
-  GLfloat m_xAngle = 20.0f;
+  GLfloat m_xAngle = 10.0f; // around 11° on 16:9 looks similar to the former 20° on squeezed 1:1
   GLfloat m_yAngle = 45.0f;
   GLfloat m_zAngle = 0.0f;
 
   GLfloat m_yFixedAngle = -15.0f;
+  GLfloat m_yOffset = -0.25f;
 
   GLfloat m_ySpeed = 0.5f;
 
@@ -158,8 +161,6 @@ bool CVisualizationSpectrum::Start(int channels, int samplesPerSec, int bitsPerS
       m_cHeights[y][x] = 0.0f;
     }
   }
-
-  m_projMat = glm::frustum(-1.0f, 1.0f, -1.0f, 1.0f, 1.5f, 10.0f);
 
 #ifdef HAS_GL
   glGenBuffers(2, m_vertexVBO);
@@ -227,12 +228,20 @@ void CVisualizationSpectrum::Render()
   // Clear the screen
   glClear(GL_DEPTH_BUFFER_BIT);
 
+  GLfloat dar = (float)Width() / (float)Height();
+  GLfloat par = PixelRatio();
+
+  kodi::Log(ADDON_LOG_DEBUG, "%s: dar, par: %f %f", __func__, dar, par);
+
   if (m_yFixedAngle < 0.0f)
     m_yAngle = std::fmod(m_yAngle + m_ySpeed, 360.0f);
   else
     m_yAngle = m_yFixedAngle;
 
-  m_modelMat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, -5.0f));
+  m_projMat = glm::frustum(-1.0f, 1.0f, -1.0f / dar / par, 1.0f / dar / par, 1.5f, 10.0f);
+
+  m_modelMat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, m_yOffset, -5.0f));
+
   m_modelMat = glm::rotate(m_modelMat, glm::radians(m_xAngle), glm::vec3(1.0f, 0.0f, 0.0f));
   m_modelMat = glm::rotate(m_modelMat, glm::radians(m_yAngle), glm::vec3(0.0f, 1.0f, 0.0f));
   m_modelMat = glm::rotate(m_modelMat, glm::radians(m_zAngle), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -300,7 +309,7 @@ void CVisualizationSpectrum::AddQuad(glm::vec3 a, glm::vec3 b, glm::vec3 c, glm:
 
 void CVisualizationSpectrum::AddBar(GLfloat xMid, GLfloat zMid, GLfloat height, GLfloat red, GLfloat green, GLfloat blue)
 {
-  GLfloat wHalf = 0.1f * 0.5f;
+  GLfloat wHalf = m_fieldScale / (NUM_BANDS - 1.0f) * 0.5f * 0.5f;
 
   GLfloat lft = xMid - wHalf;
   GLfloat rgt = xMid + wHalf;
@@ -359,13 +368,13 @@ void CVisualizationSpectrum::RenderBufferData()
 
   for (size_t y = 0; y < NUM_BANDS; y++)
   {
-    GLfloat zMid = 3.0f * (0.5f - y / (NUM_BANDS - 1.0f));
+    GLfloat zMid = m_fieldScale * (0.5f - y / (NUM_BANDS - 1.0f));
 
     GLfloat blue = y / (NUM_BANDS - 1.0f);
 
     for (size_t x = 0; x < NUM_BANDS; x++)
     {
-      GLfloat xMid = 3.0f * (-0.5f + x / (NUM_BANDS - 1.0f));
+      GLfloat xMid = m_fieldScale * (-0.5f + x / (NUM_BANDS - 1.0f));
 
       GLfloat green = x / (NUM_BANDS - 1.0f);
 
@@ -503,32 +512,34 @@ ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName, 
 
   if (settingName == "bar_height")
   {
+    m_hScale = 0.56f; // try to match avarage heights on former squeezed 1:1-frustum at least on 16:9 displays
+
     switch (value)
     {
       case 0:
       {
-        m_hScale = 0.5f; // small
+        m_hScale *= 0.5f; // small
         break;
       }
       case 1:
       default:
       {
-        m_hScale = 1.0f; // default
+        m_hScale *= 1.0f; // default
         break;
       }
       case 2:
       {
-        m_hScale = 2.0f; // big
+        m_hScale *= 2.0f; // big
         break;
       }
       case 3:
       {
-        m_hScale = 3.0f; // very big
+        m_hScale *= 3.0f; // very big
         break;
       }
       case 4:
       {
-        m_hScale = 0.33f; // unused
+        m_hScale *= 0.33f; // unused
         break;
       }
     }
@@ -539,6 +550,10 @@ ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName, 
       m_dbRange = 48;
     else
       m_dbRange = value;
+  }
+  else if (settingName == "field_size")
+  {
+    m_fieldScale = value / 100.0f * 3.0f;
   }
   else if (settingName == "mode")
   {
@@ -562,6 +577,10 @@ ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName, 
       }
     }
   }
+  else if (settingName == "offset_y")
+  {
+    m_yOffset = value / 100.0f;
+  }
   else if (settingName == "pointsize")
   {
     m_pointSize = value;
@@ -569,6 +588,14 @@ ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName, 
   else if (settingName == "rotation_angle")
   {
     m_yFixedAngle = value;
+  }
+  else if (settingName == "rotation_speed")
+  {
+    m_ySpeed = powf(2.0f, value) * 0.5f;
+  }
+  else if (settingName == "rotation_x")
+  {
+    m_xAngle = value;
   }
   else if (settingName == "speed")
   {

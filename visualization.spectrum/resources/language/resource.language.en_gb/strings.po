@@ -114,3 +114,22 @@ msgctxt "#30021"
 msgid "{0:d} dB"
 msgstr ""
 
+msgctxt "#30022"
+msgid "Tilt"
+msgstr ""
+
+msgctxt "#30023"
+msgid "Base"
+msgstr ""
+
+msgctxt "#30024"
+msgid "{0:d}%"
+msgstr ""
+
+msgctxt "#30025"
+msgid "Field size"
+msgstr ""
+
+msgctxt "#30026"
+msgid "Rotation speed"
+msgstr ""
