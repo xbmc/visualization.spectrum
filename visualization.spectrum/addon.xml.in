@@ -18,6 +18,14 @@
       <screenshot>resources/screenshot-01.jpg</screenshot>
       <screenshot>resources/screenshot-02.jpg</screenshot>
       <screenshot>resources/screenshot-03.jpg</screenshot>
+      <!-- new screenshots (GL only)                           ** FIXME **
+      <screenshot>resources/screenshot-1.png</screenshot>
+      <screenshot>resources/screenshot-2.png</screenshot>
+      <screenshot>resources/screenshot-3.png</screenshot>
+      <screenshot>resources/screenshot-4.png</screenshot>
+      <screenshot>resources/screenshot-5.png</screenshot>
+      <screenshot>resources/screenshot-6.png</screenshot>
+      -->
     </assets>
     <summary lang="af_ZA">Visualisering wys a roterende 3D Spektrum Analiseerder</summary>
     <summary lang="ar_SA">عارض يظهر طيف محلل دوري ثلاثي الأبعاد</summary>

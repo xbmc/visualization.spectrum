@@ -21,7 +21,7 @@ msgid "Visualisation showing a rotating 3D Spectrum Analyzer"
 msgstr ""
 
 msgctxt "Addon Description"
-msgid "Spectrum is a Visualisation showing a rotating 3D Spectrum Analyzer rendered in  that moves to the beat of the music creating a wave effect across the spectrum grid.[CR]It also has settings to adjust the spectrum bar height, Its speed, and how the bars are rendered (solid, points, wire frame) and is a nice light weight, low cpu useage visualisation that looks great"
+msgid "Spectrum is a Visualisation showing a rotating 3D Spectrum Analyzer rendered in that moves to the beat of the music creating a wave effect across the spectrum grid.[CR]It also has settings to adjust the spectrum bar height, Its speed, and how the bars are rendered (solid, points, wire frame) and is a nice light weight, low cpu useage visualisation that looks great."
 msgstr ""
 
 #settings labels
@@ -43,7 +43,7 @@ msgid "Points"
 msgstr ""
 
 msgctxt "#30004"
-msgid "Bar Height"
+msgid "Bar height"
 msgstr ""
 
 msgctxt "#30005"
@@ -59,15 +59,15 @@ msgid "Big"
 msgstr ""
 
 msgctxt "#30008"
-msgid "Very Big"
+msgid "Very big"
 msgstr ""
 
 msgctxt "#30009"
-msgid "Speed"
+msgid "Bar height speed"
 msgstr ""
 
 msgctxt "#30010"
-msgid "Very Slow"
+msgid "Very slow"
 msgstr ""
 
 msgctxt "#30011"
@@ -83,7 +83,7 @@ msgid "Fast"
 msgstr ""
 
 msgctxt "#30014"
-msgid "Very Fast"
+msgid "Very fast"
 msgstr ""
 
 msgctxt "#30015"
@@ -103,5 +103,146 @@ msgid "{0:d}°"
 msgstr ""
 
 msgctxt "#30019"
-msgid "Turn continuously"
+msgid "Undefined"
+msgstr ""
+
+msgctxt "#30020"
+msgid "Dynamic range"
+msgstr ""
+
+msgctxt "#30021"
+msgid "{0:d} dB"
+msgstr ""
+
+msgctxt "#30022"
+msgid "Tilt"
+msgstr ""
+
+msgctxt "#30023"
+msgid "Base"
+msgstr ""
+
+msgctxt "#30024"
+msgid "{0:d}%"
+msgstr ""
+
+msgctxt "#30025"
+msgid "Field size"
+msgstr ""
+
+msgctxt "#30026"
+msgid "Rotation speed"
+msgstr ""
+
+msgctxt "#30027"
+msgid "Bands"
+msgstr ""
+
+msgctxt "#30028"
+msgid "{0:d}"
+msgstr ""
+
+msgctxt "#30029"
+msgid "Colour mode"
+msgstr ""
+
+msgctxt "#30030"
+msgid "Legacy"
+msgstr ""
+
+msgctxt "#30031"
+msgid "Default"
+msgstr ""
+
+msgctxt "#30032"
+msgid "Flat"
+msgstr ""
+
+msgctxt "#30033"
+msgid "Amber"
+msgstr ""
+
+msgctxt "#30034"
+msgid "Blue"
+msgstr ""
+
+msgctxt "#30035"
+msgid "Green"
+msgstr ""
+
+msgctxt "#30036"
+msgid "Bar width"
+msgstr ""
+
+msgctxt "#30037"
+msgid "Smooth animation"
+msgstr ""
+
+msgctxt "#30038"
+msgid "Off"
+msgstr ""
+
+msgctxt "#30039"
+msgid "On"
+msgstr ""
+
+msgctxt "#30040"
+msgid "Name"
+msgstr ""
+
+msgctxt "#30041"
+msgid "Skip on previous/next/random preset"
+msgstr ""
+
+msgctxt "#30042"
+msgid "Zero"
+msgstr ""
+
+msgctxt "#30043"
+msgid "Reverse rotation"
+msgstr ""
+
+msgctxt "#30044"
+msgid "Opposite of template"
+msgstr ""
+
+
+msgctxt "#30100"
+msgid "Template"
+msgstr ""
+
+msgctxt "#30101"
+msgid "#1 (Legacy)"
+msgstr ""
+
+msgctxt "#30102"
+msgid "#2 (Twister 32)"
+msgstr ""
+
+msgctxt "#30103"
+msgid "#3 (Twister 32 stop)"
+msgstr ""
+
+msgctxt "#30104"
+msgid "#4 (Twister)"
+msgstr ""
+
+msgctxt "#30105"
+msgid "#5 (Twister stop)"
+msgstr ""
+
+msgctxt "#30106"
+msgid "#6 (Twister reverse)"
+msgstr ""
+
+msgctxt "#30107"
+msgid "#7 (Odyssey)"
+msgstr ""
+
+msgctxt "#30108"
+msgid "#8 (Matrix)"
+msgstr ""
+
+msgctxt "#30109"
+msgid "#9 (Trainspotting)"
 msgstr ""
