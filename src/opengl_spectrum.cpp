@@ -81,6 +81,8 @@ private:
   std::vector<glm::vec3> m_vertex_buffer_data;
   std::vector<glm::vec3> m_color_buffer_data;
 
+  GLuint m_vao = 0;
+
 #ifdef HAS_GL
   GLuint m_vertexVBO[2] = {0};
 #endif
@@ -150,6 +152,8 @@ bool CVisualizationSpectrum::Start(int channels, int samplesPerSec, int bitsPerS
 
   m_projMat = glm::frustum(-1.0f, 1.0f, -1.0f, 1.0f, 1.5f, 10.0f);
 
+  glGenVertexArrays(1, &m_vao);
+
 #ifdef HAS_GL
   glGenBuffers(2, m_vertexVBO);
 #endif
@@ -166,11 +170,12 @@ void CVisualizationSpectrum::Stop()
   m_startOK = false;
 
 #ifdef HAS_GL
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
   glDeleteBuffers(2, m_vertexVBO);
   m_vertexVBO[0] = 0;
   m_vertexVBO[1] = 0;
 #endif
+
+  glDeleteVertexArrays(1, &m_vao);
 }
 
 //-- Render -------------------------------------------------------------------
@@ -180,6 +185,8 @@ void CVisualizationSpectrum::Render()
 {
   if (!m_startOK)
     return;
+
+  glBindVertexArray(m_vao);
 
 #ifdef HAS_GL
   glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO[0]);
@@ -241,6 +248,8 @@ void CVisualizationSpectrum::Render()
 
   glDisableVertexAttribArray(m_hPos);
   glDisableVertexAttribArray(m_hCol);
+
+  glBindVertexArray(0);
 
   glDisable(GL_DEPTH_TEST);
 #ifdef HAS_GL
