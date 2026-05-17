@@ -21,17 +21,15 @@
 
 #define __STDC_LIMIT_MACROS
 
+#include <cstddef>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <kodi/addon-instance/Visualization.h>
 #include <kodi/gui/gl/GL.h>
 #include <kodi/gui/gl/Shader.h>
-
-#include <string.h>
 #include <math.h>
 #include <stdint.h>
-#include <cstddef>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <string.h>
 
 #ifndef M_PI
 #define M_PI 3.141592654f
@@ -39,20 +37,23 @@
 
 #define NUM_BANDS 16
 
-class ATTR_DLL_LOCAL CVisualizationSpectrum
-  : public kodi::addon::CAddonBase,
-    public kodi::addon::CInstanceVisualization,
-    public kodi::gui::gl::CShaderProgram
+class ATTR_DLL_LOCAL CVisualizationSpectrum : public kodi::addon::CAddonBase,
+                                              public kodi::addon::CInstanceVisualization,
+                                              public kodi::gui::gl::CShaderProgram
 {
 public:
   CVisualizationSpectrum();
   ~CVisualizationSpectrum() override = default;
 
-  bool Start(int channels, int samplesPerSec, int bitsPerSample, const std::string& songName) override;
+  bool Start(int channels,
+             int samplesPerSec,
+             int bitsPerSample,
+             const std::string& songName) override;
   void Stop() override;
   void Render() override;
   void AudioData(const float* audioData, size_t audioDataLength) override;
-  ADDON_STATUS SetSetting(const std::string& settingName, const kodi::addon::CSettingValue& settingValue) override;
+  ADDON_STATUS SetSetting(const std::string& settingName,
+                          const kodi::addon::CSettingValue& settingValue) override;
 
   void OnCompiledAndLinked() override;
   bool OnEnabled() override;
@@ -71,7 +72,8 @@ private:
   float m_z_angle, m_z_speed;
   float m_hSpeed;
 
-  void draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue);
+  void draw_bar(
+      GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue);
   void draw_bars(void);
 
   // Shader related data
@@ -115,15 +117,20 @@ CVisualizationSpectrum::CVisualizationSpectrum()
   m_color_buffer_data.resize(48);
 }
 
-bool CVisualizationSpectrum::Start(int channels, int samplesPerSec, int bitsPerSample, const std::string& songName)
+bool CVisualizationSpectrum::Start(int channels,
+                                   int samplesPerSec,
+                                   int bitsPerSample,
+                                   const std::string& songName)
 {
   (void)channels;
   (void)samplesPerSec;
   (void)bitsPerSample;
   (void)songName;
 
-  std::string fraqShader = kodi::addon::GetAddonPath("resources/shaders/" GL_TYPE_STRING "/frag.glsl");
-  std::string vertShader = kodi::addon::GetAddonPath("resources/shaders/" GL_TYPE_STRING "/vert.glsl");
+  std::string fraqShader =
+      kodi::addon::GetAddonPath("resources/shaders/" GL_TYPE_STRING "/frag.glsl");
+  std::string vertShader =
+      kodi::addon::GetAddonPath("resources/shaders/" GL_TYPE_STRING "/vert.glsl");
   if (!LoadShaderFiles(vertShader, fraqShader) || !CompileAndLink())
   {
     kodi::Log(ADDON_LOG_ERROR, "Failed to create or compile shader");
@@ -132,9 +139,9 @@ bool CVisualizationSpectrum::Start(int channels, int samplesPerSec, int bitsPerS
 
   int x, y;
 
-  for(x = 0; x < 16; x++)
+  for (x = 0; x < 16; x++)
   {
-    for(y = 0; y < 16; y++)
+    for (y = 0; y < 16; y++)
     {
       m_heights[y][x] = 0.0f;
       m_cHeights[y][x] = 0.0f;
@@ -183,11 +190,11 @@ void CVisualizationSpectrum::Render()
 
 #ifdef HAS_GL
   glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO[0]);
-  glVertexAttribPointer(m_hPos, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*3, nullptr);
+  glVertexAttribPointer(m_hPos, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, nullptr);
   glEnableVertexAttribArray(m_hPos);
 
   glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO[1]);
-  glVertexAttribPointer(m_hCol, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*3, nullptr);
+  glVertexAttribPointer(m_hCol, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, nullptr);
   glEnableVertexAttribArray(m_hCol);
 #else
   // 1rst attribute buffer : vertices
@@ -210,13 +217,13 @@ void CVisualizationSpectrum::Render()
   glClear(GL_DEPTH_BUFFER_BIT);
 
   m_x_angle += m_x_speed;
-  if(m_x_angle >= 360.0f)
+  if (m_x_angle >= 360.0f)
     m_x_angle -= 360.0f;
 
   if (m_y_fixedAngle < 0.0f)
   {
     m_y_angle += m_y_speed;
-    if(m_y_angle >= 360.0f)
+    if (m_y_angle >= 360.0f)
       m_y_angle -= 360.0f;
   }
   else
@@ -225,7 +232,7 @@ void CVisualizationSpectrum::Render()
   }
 
   m_z_angle += m_z_speed;
-  if(m_z_angle >= 360.0f)
+  if (m_z_angle >= 360.0f)
     m_z_angle -= 360.0f;
 
   m_modelMat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, -5.0f));
@@ -269,70 +276,68 @@ bool CVisualizationSpectrum::OnEnabled()
   return true;
 }
 
-void CVisualizationSpectrum::draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue )
+void CVisualizationSpectrum::draw_bar(
+    GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue)
 {
   GLfloat width = 0.1f;
-  m_vertex_buffer_data =
-  {
-    // Bottom
-    { x_offset + width, 0.0f,   z_offset + width },
-    { x_offset,         0.0f,   z_offset },
-    { x_offset + width, 0.0f,   z_offset },
-    { x_offset + width, 0.0f,   z_offset + width },
-    { x_offset,         0.0f,   z_offset + width },
-    { x_offset,         0.0f,   z_offset },
+  m_vertex_buffer_data = {// Bottom
+                          {x_offset + width, 0.0f, z_offset + width},
+                          {x_offset, 0.0f, z_offset},
+                          {x_offset + width, 0.0f, z_offset},
+                          {x_offset + width, 0.0f, z_offset + width},
+                          {x_offset, 0.0f, z_offset + width},
+                          {x_offset, 0.0f, z_offset},
 
-    { x_offset,         0.0f,   z_offset + width },
-    { x_offset + width, 0.0f,   z_offset },
-    { x_offset + width, 0.0f,   z_offset + width },
-    { x_offset,         0.0f,   z_offset + width },
-    { x_offset + width, 0.0f,   z_offset },
-    { x_offset,         0.0f,   z_offset },
+                          {x_offset, 0.0f, z_offset + width},
+                          {x_offset + width, 0.0f, z_offset},
+                          {x_offset + width, 0.0f, z_offset + width},
+                          {x_offset, 0.0f, z_offset + width},
+                          {x_offset + width, 0.0f, z_offset},
+                          {x_offset, 0.0f, z_offset},
 
-    // Side
-    { x_offset,         0.0f,   z_offset },
-    { x_offset,         0.0f,   z_offset + width },
-    { x_offset,         height, z_offset + width },
-    { x_offset,         0.0f,   z_offset },
-    { x_offset,         height, z_offset + width },
-    { x_offset,         height, z_offset },
+                          // Side
+                          {x_offset, 0.0f, z_offset},
+                          {x_offset, 0.0f, z_offset + width},
+                          {x_offset, height, z_offset + width},
+                          {x_offset, 0.0f, z_offset},
+                          {x_offset, height, z_offset + width},
+                          {x_offset, height, z_offset},
 
-    { x_offset + width, height, z_offset },
-    { x_offset,         0.0f,   z_offset },
-    { x_offset,         height, z_offset },
-    { x_offset + width, height, z_offset },
-    { x_offset + width, 0.0f,   z_offset },
-    { x_offset,         0.0f,   z_offset },
+                          {x_offset + width, height, z_offset},
+                          {x_offset, 0.0f, z_offset},
+                          {x_offset, height, z_offset},
+                          {x_offset + width, height, z_offset},
+                          {x_offset + width, 0.0f, z_offset},
+                          {x_offset, 0.0f, z_offset},
 
-    { x_offset,         height, z_offset + width },
-    { x_offset,         0.0f,   z_offset + width },
-    { x_offset + width, 0.0f,   z_offset + width },
-    { x_offset + width, height, z_offset + width },
-    { x_offset,         height, z_offset + width },
-    { x_offset + width, 0.0f,   z_offset + width },
+                          {x_offset, height, z_offset + width},
+                          {x_offset, 0.0f, z_offset + width},
+                          {x_offset + width, 0.0f, z_offset + width},
+                          {x_offset + width, height, z_offset + width},
+                          {x_offset, height, z_offset + width},
+                          {x_offset + width, 0.0f, z_offset + width},
 
-    { x_offset + width, height, z_offset + width },
-    { x_offset + width, 0.0f,   z_offset },
-    { x_offset + width, height, z_offset },
-    { x_offset + width, 0.0f,   z_offset },
-    { x_offset + width, height, z_offset + width },
-    { x_offset + width, 0.0f,   z_offset + width },
+                          {x_offset + width, height, z_offset + width},
+                          {x_offset + width, 0.0f, z_offset},
+                          {x_offset + width, height, z_offset},
+                          {x_offset + width, 0.0f, z_offset},
+                          {x_offset + width, height, z_offset + width},
+                          {x_offset + width, 0.0f, z_offset + width},
 
-    // Top
-    { x_offset + width, height, z_offset + width },
-    { x_offset + width, height, z_offset },
-    { x_offset,         height, z_offset },
-    { x_offset + width, height, z_offset + width },
-    { x_offset,         height, z_offset },
-    { x_offset,         height, z_offset + width },
+                          // Top
+                          {x_offset + width, height, z_offset + width},
+                          {x_offset + width, height, z_offset},
+                          {x_offset, height, z_offset},
+                          {x_offset + width, height, z_offset + width},
+                          {x_offset, height, z_offset},
+                          {x_offset, height, z_offset + width},
 
-    { x_offset,         height, z_offset + width },
-    { x_offset + width, height, z_offset },
-    { x_offset,         height, z_offset },
-    { x_offset + width, height, z_offset },
-    { x_offset + width, height, z_offset + width },
-    { x_offset,         height, z_offset + width }
-  };
+                          {x_offset, height, z_offset + width},
+                          {x_offset + width, height, z_offset},
+                          {x_offset, height, z_offset},
+                          {x_offset + width, height, z_offset},
+                          {x_offset + width, height, z_offset + width},
+                          {x_offset, height, z_offset + width}};
 
   float sideMlpy1, sideMlpy2, sideMlpy3, sideMlpy4;
   if (m_mode == GL_TRIANGLES)
@@ -348,75 +353,79 @@ void CVisualizationSpectrum::draw_bar(GLfloat x_offset, GLfloat z_offset, GLfloa
   }
 
   // One color for each vertex. They were generated randomly.
-  m_color_buffer_data =
-  {
-    // Bottom
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
+  m_color_buffer_data = {
+      // Bottom
+      {red, green, blue},
+      {red, green, blue},
+      {red, green, blue},
+      {red, green, blue},
+      {red, green, blue},
+      {red, green, blue},
 
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
+      {red, green, blue},
+      {red, green, blue},
+      {red, green, blue},
+      {red, green, blue},
+      {red, green, blue},
+      {red, green, blue},
 
-    // Side
-    { red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1 },
-    { red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1 },
-    { red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1 },
-    { red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1 },
-    { red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1 },
-    { red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1 },
+      // Side
+      {red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1},
+      {red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1},
+      {red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1},
+      {red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1},
+      {red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1},
+      {red * sideMlpy1, green * sideMlpy1, blue * sideMlpy1},
 
-    { red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2 },
-    { red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2 },
-    { red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2 },
-    { red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2 },
-    { red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2 },
-    { red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2 },
+      {red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2},
+      {red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2},
+      {red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2},
+      {red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2},
+      {red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2},
+      {red * sideMlpy2, green * sideMlpy2, blue * sideMlpy2},
 
-    { red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3 },
-    { red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3 },
-    { red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3 },
-    { red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3 },
-    { red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3 },
-    { red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3 },
+      {red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3},
+      {red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3},
+      {red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3},
+      {red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3},
+      {red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3},
+      {red * sideMlpy3, green * sideMlpy3, blue * sideMlpy3},
 
-    { red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4 },
-    { red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4 },
-    { red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4 },
-    { red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4 },
-    { red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4 },
-    { red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4 },
+      {red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4},
+      {red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4},
+      {red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4},
+      {red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4},
+      {red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4},
+      {red * sideMlpy4, green * sideMlpy4, blue * sideMlpy4},
 
-    // Top
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
+      // Top
+      {red, green, blue},
+      {red, green, blue},
+      {red, green, blue},
+      {red, green, blue},
+      {red, green, blue},
+      {red, green, blue},
 
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
-    { red, green, blue },
+      {red, green, blue},
+      {red, green, blue},
+      {red, green, blue},
+      {red, green, blue},
+      {red, green, blue},
+      {red, green, blue},
   };
 
 #ifdef HAS_GL
   glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO[0]);
-  glBufferData(GL_ARRAY_BUFFER, m_vertex_buffer_data.size()*sizeof(glm::vec3), &m_vertex_buffer_data[0], GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, m_vertex_buffer_data.size() * sizeof(glm::vec3),
+               &m_vertex_buffer_data[0], GL_STATIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO[1]);
-  glBufferData(GL_ARRAY_BUFFER, m_color_buffer_data.size()*sizeof(glm::vec3), &m_color_buffer_data[0], GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, m_color_buffer_data.size() * sizeof(glm::vec3),
+               &m_color_buffer_data[0], GL_STATIC_DRAW);
 #endif
-  glDrawArrays(m_mode, 0, m_vertex_buffer_data.size()); /* 12*3 indices starting at 0 -> 12 triangles + 4*3 to have on lines show correct */
+  glDrawArrays(
+      m_mode, 0,
+      m_vertex_buffer_data
+          .size()); /* 12*3 indices starting at 0 -> 12 triangles + 4*3 to have on lines show correct */
 }
 
 void CVisualizationSpectrum::draw_bars(void)
@@ -424,58 +433,59 @@ void CVisualizationSpectrum::draw_bars(void)
   int x, y;
   GLfloat x_offset, z_offset, r_base, b_base;
 
-  for(y = 0; y < 16; y++)
+  for (y = 0; y < 16; y++)
   {
     z_offset = -1.6 + ((15 - y) * 0.2);
 
     b_base = y * (1.0 / 15);
     r_base = 1.0 - b_base;
 
-    for(x = 0; x < 16; x++)
+    for (x = 0; x < 16; x++)
     {
       x_offset = -1.6 + ((float)x * 0.2);
-      if (::fabs(m_cHeights[y][x]-m_heights[y][x])>m_hSpeed)
+      if (::fabs(m_cHeights[y][x] - m_heights[y][x]) > m_hSpeed)
       {
-        if (m_cHeights[y][x]<m_heights[y][x])
+        if (m_cHeights[y][x] < m_heights[y][x])
           m_cHeights[y][x] += m_hSpeed;
         else
           m_cHeights[y][x] -= m_hSpeed;
       }
-      draw_bar(x_offset, z_offset, m_cHeights[y][x], r_base - (float(x) * (r_base / 15.0)), (float)x * (1.0 / 15), b_base);
+      draw_bar(x_offset, z_offset, m_cHeights[y][x], r_base - (float(x) * (r_base / 15.0)),
+               (float)x * (1.0 / 15), b_base);
     }
   }
 }
 
 void CVisualizationSpectrum::AudioData(const float* pAudioData, size_t iAudioDataLength)
 {
-  int i,c;
-  int y=0;
+  int i, c;
+  int y = 0;
   GLfloat val;
 
   int xscale[] = {0, 1, 2, 3, 5, 7, 10, 14, 20, 28, 40, 54, 74, 101, 137, 187, 255};
 
-  for(y = 15; y > 0; y--)
+  for (y = 15; y > 0; y--)
   {
-    for(i = 0; i < 16; i++)
+    for (i = 0; i < 16; i++)
     {
       m_heights[y][i] = m_heights[y - 1][i];
     }
   }
 
-  for(i = 0; i < NUM_BANDS; i++)
+  for (i = 0; i < NUM_BANDS; i++)
   {
-    for(c = xscale[i], y = 0; c < xscale[i + 1]; c++)
+    for (c = xscale[i], y = 0; c < xscale[i + 1]; c++)
     {
-      if (c<iAudioDataLength)
+      if (c < iAudioDataLength)
       {
-        if((int)(pAudioData[c] * (INT16_MAX)) > y)
+        if ((int)(pAudioData[c] * (INT16_MAX)) > y)
           y = (int)(pAudioData[c] * (INT16_MAX));
       }
       else
         continue;
     }
     y >>= 7;
-    if(y > 0)
+    if (y > 0)
       val = (logf(y) * m_scale);
     else
       val = 0;
@@ -487,26 +497,26 @@ void CVisualizationSpectrum::SetBarHeightSetting(int settingValue)
 {
   switch (settingValue)
   {
-  case 1://standard
-    m_scale = 1.f / log(256.f);
-    break;
+    case 1: //standard
+      m_scale = 1.f / log(256.f);
+      break;
 
-  case 2://big
-    m_scale = 2.f / log(256.f);
-    break;
+    case 2: //big
+      m_scale = 2.f / log(256.f);
+      break;
 
-  case 3://real big
-    m_scale = 3.f / log(256.f);
-    break;
+    case 3: //real big
+      m_scale = 3.f / log(256.f);
+      break;
 
-  case 4://unused
-    m_scale = 0.33f / log(256.f);
-    break;
+    case 4: //unused
+      m_scale = 0.33f / log(256.f);
+      break;
 
-  case 0://small
-  default:
-    m_scale = 0.5f / log(256.f);
-    break;
+    case 0: //small
+    default:
+      m_scale = 0.5f / log(256.f);
+      break;
   }
 }
 
@@ -514,26 +524,26 @@ void CVisualizationSpectrum::SetSpeedSetting(int settingValue)
 {
   switch (settingValue)
   {
-  case 1:
-    m_hSpeed = 0.025f;
-    break;
+    case 1:
+      m_hSpeed = 0.025f;
+      break;
 
-  case 2:
-    m_hSpeed = 0.0125f;
-    break;
+    case 2:
+      m_hSpeed = 0.0125f;
+      break;
 
-  case 3:
-    m_hSpeed = 0.1f;
-    break;
+    case 3:
+      m_hSpeed = 0.1f;
+      break;
 
-  case 4:
-    m_hSpeed = 0.2f;
-    break;
+    case 4:
+      m_hSpeed = 0.2f;
+      break;
 
-  case 0:
-  default:
-    m_hSpeed = 0.05f;
-    break;
+    case 0:
+    default:
+      m_hSpeed = 0.05f;
+      break;
   }
 }
 
@@ -563,7 +573,8 @@ void CVisualizationSpectrum::SetModeSetting(int settingValue)
 // Set a specific Setting value (called from Kodi)
 // !!! Add-on master function !!!
 //-----------------------------------------------------------------------------
-ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName, const kodi::addon::CSettingValue& settingValue)
+ADDON_STATUS CVisualizationSpectrum::SetSetting(const std::string& settingName,
+                                                const kodi::addon::CSettingValue& settingValue)
 {
   if (settingName.empty() || settingValue.empty())
     return ADDON_STATUS_UNKNOWN;

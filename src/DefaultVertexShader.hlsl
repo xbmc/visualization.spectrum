@@ -25,7 +25,7 @@ cbuffer cbWorld : register(b1)
 VS_OUT main(float4 pos : POSITION, float4 col : COLOR)
 {
   VS_OUT r = (VS_OUT)0;
-  r.pos = mul(  pos, world);
+  r.pos = mul(pos, world);
   r.pos = mul(r.pos, view);
   r.pos = mul(r.pos, proj);
   r.col = col;
