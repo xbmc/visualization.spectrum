@@ -21,6 +21,7 @@
 
 #define __STDC_LIMIT_MACROS
 
+#include <array>
 #include <cstddef>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -80,8 +81,8 @@ private:
   glm::mat4 m_projMat;
   glm::mat4 m_modelMat;
   GLfloat m_pointSize = 0.0f;
-  std::vector<glm::vec3> m_vertex_buffer_data;
-  std::vector<glm::vec3> m_color_buffer_data;
+  std::array<glm::vec3, 48> m_vertex_buffer_data;
+  std::array<glm::vec3, 48> m_color_buffer_data;
 
 #ifdef HAS_GL
   GLuint m_vertexVBO[2] = {0};
@@ -112,9 +113,6 @@ CVisualizationSpectrum::CVisualizationSpectrum()
   SetSpeedSetting(kodi::addon::GetSettingInt("speed"));
   SetModeSetting(kodi::addon::GetSettingInt("mode"));
   m_y_fixedAngle = kodi::addon::GetSettingInt("rotation_angle");
-
-  m_vertex_buffer_data.resize(48);
-  m_color_buffer_data.resize(48);
 }
 
 bool CVisualizationSpectrum::Start(int channels,
@@ -280,64 +278,66 @@ void CVisualizationSpectrum::draw_bar(
     GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue)
 {
   GLfloat width = 0.1f;
-  m_vertex_buffer_data = {// Bottom
-                          {x_offset + width, 0.0f, z_offset + width},
-                          {x_offset, 0.0f, z_offset},
-                          {x_offset + width, 0.0f, z_offset},
-                          {x_offset + width, 0.0f, z_offset + width},
-                          {x_offset, 0.0f, z_offset + width},
-                          {x_offset, 0.0f, z_offset},
+  m_vertex_buffer_data = {{
+      // Bottom
+      {x_offset + width, 0.0f, z_offset + width},
+      {x_offset, 0.0f, z_offset},
+      {x_offset + width, 0.0f, z_offset},
+      {x_offset + width, 0.0f, z_offset + width},
+      {x_offset, 0.0f, z_offset + width},
+      {x_offset, 0.0f, z_offset},
 
-                          {x_offset, 0.0f, z_offset + width},
-                          {x_offset + width, 0.0f, z_offset},
-                          {x_offset + width, 0.0f, z_offset + width},
-                          {x_offset, 0.0f, z_offset + width},
-                          {x_offset + width, 0.0f, z_offset},
-                          {x_offset, 0.0f, z_offset},
+      {x_offset, 0.0f, z_offset + width},
+      {x_offset + width, 0.0f, z_offset},
+      {x_offset + width, 0.0f, z_offset + width},
+      {x_offset, 0.0f, z_offset + width},
+      {x_offset + width, 0.0f, z_offset},
+      {x_offset, 0.0f, z_offset},
 
-                          // Side
-                          {x_offset, 0.0f, z_offset},
-                          {x_offset, 0.0f, z_offset + width},
-                          {x_offset, height, z_offset + width},
-                          {x_offset, 0.0f, z_offset},
-                          {x_offset, height, z_offset + width},
-                          {x_offset, height, z_offset},
+      // Side
+      {x_offset, 0.0f, z_offset},
+      {x_offset, 0.0f, z_offset + width},
+      {x_offset, height, z_offset + width},
+      {x_offset, 0.0f, z_offset},
+      {x_offset, height, z_offset + width},
+      {x_offset, height, z_offset},
 
-                          {x_offset + width, height, z_offset},
-                          {x_offset, 0.0f, z_offset},
-                          {x_offset, height, z_offset},
-                          {x_offset + width, height, z_offset},
-                          {x_offset + width, 0.0f, z_offset},
-                          {x_offset, 0.0f, z_offset},
+      {x_offset + width, height, z_offset},
+      {x_offset, 0.0f, z_offset},
+      {x_offset, height, z_offset},
+      {x_offset + width, height, z_offset},
+      {x_offset + width, 0.0f, z_offset},
+      {x_offset, 0.0f, z_offset},
 
-                          {x_offset, height, z_offset + width},
-                          {x_offset, 0.0f, z_offset + width},
-                          {x_offset + width, 0.0f, z_offset + width},
-                          {x_offset + width, height, z_offset + width},
-                          {x_offset, height, z_offset + width},
-                          {x_offset + width, 0.0f, z_offset + width},
+      {x_offset, height, z_offset + width},
+      {x_offset, 0.0f, z_offset + width},
+      {x_offset + width, 0.0f, z_offset + width},
+      {x_offset + width, height, z_offset + width},
+      {x_offset, height, z_offset + width},
+      {x_offset + width, 0.0f, z_offset + width},
 
-                          {x_offset + width, height, z_offset + width},
-                          {x_offset + width, 0.0f, z_offset},
-                          {x_offset + width, height, z_offset},
-                          {x_offset + width, 0.0f, z_offset},
-                          {x_offset + width, height, z_offset + width},
-                          {x_offset + width, 0.0f, z_offset + width},
+      {x_offset + width, height, z_offset + width},
+      {x_offset + width, 0.0f, z_offset},
+      {x_offset + width, height, z_offset},
+      {x_offset + width, 0.0f, z_offset},
+      {x_offset + width, height, z_offset + width},
+      {x_offset + width, 0.0f, z_offset + width},
 
-                          // Top
-                          {x_offset + width, height, z_offset + width},
-                          {x_offset + width, height, z_offset},
-                          {x_offset, height, z_offset},
-                          {x_offset + width, height, z_offset + width},
-                          {x_offset, height, z_offset},
-                          {x_offset, height, z_offset + width},
+      // Top
+      {x_offset + width, height, z_offset + width},
+      {x_offset + width, height, z_offset},
+      {x_offset, height, z_offset},
+      {x_offset + width, height, z_offset + width},
+      {x_offset, height, z_offset},
+      {x_offset, height, z_offset + width},
 
-                          {x_offset, height, z_offset + width},
-                          {x_offset + width, height, z_offset},
-                          {x_offset, height, z_offset},
-                          {x_offset + width, height, z_offset},
-                          {x_offset + width, height, z_offset + width},
-                          {x_offset, height, z_offset + width}};
+      {x_offset, height, z_offset + width},
+      {x_offset + width, height, z_offset},
+      {x_offset, height, z_offset},
+      {x_offset + width, height, z_offset},
+      {x_offset + width, height, z_offset + width},
+      {x_offset, height, z_offset + width},
+  }};
 
   float sideMlpy1, sideMlpy2, sideMlpy3, sideMlpy4;
   if (m_mode == GL_TRIANGLES)
@@ -353,7 +353,7 @@ void CVisualizationSpectrum::draw_bar(
   }
 
   // One color for each vertex. They were generated randomly.
-  m_color_buffer_data = {
+  m_color_buffer_data = {{
       // Bottom
       {red, green, blue},
       {red, green, blue},
@@ -412,7 +412,7 @@ void CVisualizationSpectrum::draw_bar(
       {red, green, blue},
       {red, green, blue},
       {red, green, blue},
-  };
+  }};
 
 #ifdef HAS_GL
   glBindBuffer(GL_ARRAY_BUFFER, m_vertexVBO[0]);
