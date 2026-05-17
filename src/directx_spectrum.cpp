@@ -60,8 +60,11 @@ class CVisualizationSpectrum : public kodi::addon::CAddonBase,
                                public kodi::addon::CInstanceVisualization
 {
 public:
-  CVisualizationSpectrum();
-  ~CVisualizationSpectrum() override;
+  CVisualizationSpectrum() = default;
+  ~CVisualizationSpectrum() override = default;
+
+  bool Init() override;
+  void DeInit() override;
 
   void Render() override;
   void AudioData(const float* audioData, size_t audioDataLength) override;
@@ -111,7 +114,7 @@ private:
 // Called on load. Addon should fully initalize or return error status
 // !!! Add-on master function !!!
 //-----------------------------------------------------------------------------
-CVisualizationSpectrum::CVisualizationSpectrum()
+bool CVisualizationSpectrum::Init()
 {
   m_context = (ID3D11DeviceContext*)Device();
   m_context->GetDevice(&m_device);
@@ -122,14 +125,18 @@ CVisualizationSpectrum::CVisualizationSpectrum()
   m_y_fixedAngle = kodi::addon::GetSettingInt("rotation_angle");
 
   if (!init_renderer_objs())
+  {
     kodi::Log(ADDON_LOG_ERROR, "Failed to init DirectX");
+    return false;
+  }
+
+  return true;
 }
 
-//-- Destroy ------------------------------------------------------------------
+//-- DeInit ------------------------------------------------------------------
 // Do everything before unload of this add-on
-// !!! Add-on master function !!!
 //-----------------------------------------------------------------------------
-CVisualizationSpectrum::~CVisualizationSpectrum()
+void CVisualizationSpectrum::DeInit()
 {
   if (m_cViewProj)
     m_cViewProj->Release();
