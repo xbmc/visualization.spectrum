@@ -63,10 +63,6 @@ public:
   CVisualizationSpectrum();
   ~CVisualizationSpectrum() override;
 
-  bool Start(int channels,
-             int samplesPerSec,
-             int bitsPerSample,
-             const std::string& songName) override;
   void Render() override;
   void AudioData(const float* audioData, size_t audioDataLength) override;
   ADDON_STATUS SetSetting(const std::string& settingName,
@@ -77,12 +73,18 @@ private:
   void SetSpeedSetting(int settingValue);
   void SetModeSetting(int settingValue);
 
-  float heights[16][16], cHeights[16][16], m_scale;
-  DWORD m_mode; // D3DFILL_SOLID;
-  float m_y_angle, m_y_speed, m_y_fixedAngle;
-  float m_x_angle, m_x_speed;
-  float m_z_angle, m_z_speed;
-  float m_hSpeed;
+  float heights[16][16] = {0.0f};
+  float cHeights[16][16] = {0.0f};
+  float m_scale{1.0f / log(256.0f)};
+  DWORD m_mode{3}; // D3DFILL_SOLID;
+  float m_y_angle{45.0f};
+  float m_y_speed{0.5f};
+  float m_y_fixedAngle{0.0f};
+  float m_x_angle{20.0f};
+  float m_x_speed{0.0f};
+  float m_z_angle{0.0f};
+  float m_z_speed{0.0f};
+  float m_hSpeed{0.05f};
 
   void draw_vertex(Vertex_t* pVertex, float x, float y, float z, XMFLOAT4 color);
   int draw_rectangle(
@@ -91,18 +93,18 @@ private:
   void draw_bars(void);
   bool init_renderer_objs();
 
-  ID3D11Device* m_device = nullptr;
-  ID3D11DeviceContext* m_context = nullptr;
-  ID3D11VertexShader* m_vShader = nullptr;
-  ID3D11PixelShader* m_pShader = nullptr;
-  ID3D11InputLayout* m_inputLayout = nullptr;
-  ID3D11Buffer* m_vBuffer = nullptr;
-  ID3D11Buffer* m_cViewProj = nullptr;
-  ID3D11Buffer* m_cWorld = nullptr;
-  ID3D11RasterizerState* m_rsStateSolid = nullptr;
-  ID3D11RasterizerState* m_rsStateWire = nullptr;
-  ID3D11BlendState* m_omBlend = nullptr;
-  ID3D11DepthStencilState* m_omDepth = nullptr;
+  ID3D11Device* m_device{nullptr};
+  ID3D11DeviceContext* m_context{nullptr};
+  ID3D11VertexShader* m_vShader{nullptr};
+  ID3D11PixelShader* m_pShader{nullptr};
+  ID3D11InputLayout* m_inputLayout{nullptr};
+  ID3D11Buffer* m_vBuffer{nullptr};
+  ID3D11Buffer* m_cViewProj{nullptr};
+  ID3D11Buffer* m_cWorld{nullptr};
+  ID3D11RasterizerState* m_rsStateSolid{nullptr};
+  ID3D11RasterizerState* m_rsStateWire{nullptr};
+  ID3D11BlendState* m_omBlend{nullptr};
+  ID3D11DepthStencilState* m_omDepth{nullptr};
 };
 
 //-- Create -------------------------------------------------------------------
@@ -110,14 +112,6 @@ private:
 // !!! Add-on master function !!!
 //-----------------------------------------------------------------------------
 CVisualizationSpectrum::CVisualizationSpectrum()
-  : m_mode(3),
-    m_y_angle(45.0f),
-    m_y_speed(0.5f),
-    m_x_angle(20.0f),
-    m_x_speed(0.0f),
-    m_z_angle(0.0f),
-    m_z_speed(0.0f),
-    m_hSpeed(0.05f)
 {
   m_context = (ID3D11DeviceContext*)Device();
   m_context->GetDevice(&m_device);
@@ -228,34 +222,6 @@ void CVisualizationSpectrum::Render()
 
     draw_bars();
   }
-}
-
-bool CVisualizationSpectrum::Start(int iChannels,
-                                   int iSamplesPerSec,
-                                   int iBitsPerSample,
-                                   const std::string& songName)
-{
-  int x, y;
-
-  for (x = 0; x < 16; x++)
-  {
-    for (y = 0; y < 16; y++)
-    {
-      heights[y][x] = 0.0f;
-      cHeights[y][x] = 0.0f;
-    }
-  }
-
-  m_scale = 1.0f / log(256.0f);
-
-  m_x_speed = 0.0f;
-  m_y_speed = 0.5f;
-  m_z_speed = 0.0f;
-  m_x_angle = 20.0f;
-  m_y_angle = 45.0f;
-  m_z_angle = 0.0f;
-
-  return true;
 }
 
 void CVisualizationSpectrum::AudioData(const float* pAudioData, size_t audioDataLength)

@@ -64,14 +64,18 @@ private:
   void SetSpeedSetting(int settingValue);
   void SetModeSetting(int settingValue);
 
-  GLfloat m_heights[16][16];
-  GLfloat m_cHeights[16][16];
+  GLfloat m_heights[16][16] = {0};
+  GLfloat m_cHeights[16][16] = {0};
   GLfloat m_scale;
-  GLenum m_mode;
-  float m_y_angle, m_y_speed, m_y_fixedAngle;
-  float m_x_angle, m_x_speed;
-  float m_z_angle, m_z_speed;
-  float m_hSpeed;
+  GLenum m_mode{GL_TRIANGLES};
+  float m_y_angle{45.0f};
+  float m_y_speed{0.5f};
+  float m_y_fixedAngle{0.0f};
+  float m_x_angle{20.0f};
+  float m_x_speed{0.0f};
+  float m_z_angle{0.0f};
+  float m_z_speed{0.0f};
+  float m_hSpeed{0.05f};
 
   void draw_bar(
       GLfloat x_offset, GLfloat z_offset, GLfloat height, GLfloat red, GLfloat green, GLfloat blue);
@@ -80,7 +84,7 @@ private:
   // Shader related data
   glm::mat4 m_projMat;
   glm::mat4 m_modelMat;
-  GLfloat m_pointSize = 0.0f;
+  GLfloat m_pointSize{0.0f};
   std::array<glm::vec3, 48> m_vertex_buffer_data;
   std::array<glm::vec3, 48> m_color_buffer_data;
 
@@ -88,31 +92,18 @@ private:
   GLuint m_vertexVBO[2] = {0};
 #endif
 
-  GLint m_uProjMatrix = -1;
-  GLint m_uModelMatrix = -1;
-  GLint m_uPointSize = -1;
-  GLint m_hPos = -1;
-  GLint m_hCol = -1;
+  GLint m_uProjMatrix{-1};
+  GLint m_uModelMatrix{-1};
+  GLint m_uPointSize{-1};
+  GLint m_hPos{-1};
+  GLint m_hCol{-1};
 
-  bool m_startOK = false;
+  bool m_startOK{false};
 };
 
 CVisualizationSpectrum::CVisualizationSpectrum()
-  : m_mode(GL_TRIANGLES),
-    m_y_angle(45.0f),
-    m_y_speed(0.5f),
-    m_x_angle(20.0f),
-    m_x_speed(0.0f),
-    m_z_angle(0.0f),
-    m_z_speed(0.0f),
-    m_hSpeed(0.05f)
 {
   m_scale = 1.0 / log(256.0);
-
-  SetBarHeightSetting(kodi::addon::GetSettingInt("bar_height"));
-  SetSpeedSetting(kodi::addon::GetSettingInt("speed"));
-  SetModeSetting(kodi::addon::GetSettingInt("mode"));
-  m_y_fixedAngle = kodi::addon::GetSettingInt("rotation_angle");
 }
 
 bool CVisualizationSpectrum::Start(int channels,
@@ -125,6 +116,11 @@ bool CVisualizationSpectrum::Start(int channels,
   (void)bitsPerSample;
   (void)songName;
 
+  SetBarHeightSetting(kodi::addon::GetSettingInt("bar_height"));
+  SetSpeedSetting(kodi::addon::GetSettingInt("speed"));
+  SetModeSetting(kodi::addon::GetSettingInt("mode"));
+  m_y_fixedAngle = kodi::addon::GetSettingInt("rotation_angle");
+
   std::string fraqShader =
       kodi::addon::GetAddonPath("resources/shaders/" GL_TYPE_STRING "/frag.glsl");
   std::string vertShader =
@@ -134,24 +130,6 @@ bool CVisualizationSpectrum::Start(int channels,
     kodi::Log(ADDON_LOG_ERROR, "Failed to create or compile shader");
     return false;
   }
-
-  int x, y;
-
-  for (x = 0; x < 16; x++)
-  {
-    for (y = 0; y < 16; y++)
-    {
-      m_heights[y][x] = 0.0f;
-      m_cHeights[y][x] = 0.0f;
-    }
-  }
-
-  m_x_speed = 0.0f;
-  m_y_speed = 0.5f;
-  m_z_speed = 0.0f;
-  m_x_angle = 20.0f;
-  m_y_angle = 45.0f;
-  m_z_angle = 0.0f;
 
   m_projMat = glm::frustum(-1.0f, 1.0f, -1.0f, 1.0f, 1.5f, 10.0f);
 
